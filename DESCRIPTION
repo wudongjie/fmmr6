@@ -1,0 +1,18 @@
+Package: fmmr6
+Title: The R Implementation of Finite Mixture Modellings on the R6 Class System
+Version: 0.0.0.9000
+Authors@R: 
+  person(given = "Dongjie",
+         family = "Wu",
+         role = c("aut", "cre"),
+         email = "dongjie.wu@protonmai.com")
+Description: The R Implementation of Finite Mixture Modellings on the R6 Class System.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Depends:
+  R6
+Suggests:
+  testthis
