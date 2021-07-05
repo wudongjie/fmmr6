@@ -5,18 +5,14 @@
 #'
 #' @description An abstract class for estimation methods which cannot be initialized.
 #'
-#' @name abstract_method
+#' @name AbstractMethod
 #'
 #' @return No return.
 #'
 #' @export
 
-abstract_method <- R6Class("abstract_method",
+AbstractMethod <- R6Class("AbstractMethod",
     public = list(
-        #' @description 
-        #' This is the abstract class for estimation methods.
-        #' @param fit `function(1)` \cr
-        #' Fit the model using data with the method.
         initialize = function() {
             stop("This is an abstract class that can't be initialized.")
         },

@@ -13,7 +13,7 @@ A concrete R6 object for Maximum Likelihood Estimation.
 Dongjie Wu
 }
 \section{Super class}{
-\code{\link[fmmr6:abstract_method]{fmmr6::abstract_method}} -> \code{mle}
+\code{\link[fmmr6:AbstractMethod]{fmmr6::AbstractMethod}} -> \code{mle}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -33,10 +33,22 @@ Dongjie Wu
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
+Create a new instance of this \link{R6} \link[R6:R6Class]{R6::R6Class} class.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{mle$new(Y, X)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{mle$new(family, start = NULL)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{family}}{\code{formula(1)} \cr
+The distribution family to be used in the maximum likehood estimation.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Return a R6 object of class mle
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-fit"></a>}}

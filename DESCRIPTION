@@ -5,7 +5,7 @@ Authors@R:
   person(given = "Dongjie",
          family = "Wu",
          role = c("aut", "cre"),
-         email = "dongjie.wu@protonmai.com")
+         email = "dongjie.wu@protonmail.com")
 Description: The R Implementation of Finite Mixture Modellings on the R6 Class System.
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -13,6 +13,7 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Depends:
-  R6
+  R6, optimx, numDeriv, flexmix, pracma
 Suggests:
-  testthis
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
