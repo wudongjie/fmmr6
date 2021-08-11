@@ -20,13 +20,9 @@ FamilyLogit <- R6Class("FamilyLogit",
                           #' @description 
                           #' Generate the density function
                           gen_density = function() {
-                            sigmoid <- function(x) { 
-                              return(1 / (1 + exp(x)))
-                              }
                             return(function(theta, Y, X) {
-                              den <- Y* log(sigmoid(X %*% theta)) + 
-                                (1-Y) * log(1-sigmoid(X %*% theta))
-                              return(den)
+                              R = suppressWarnings(Y*(X%*%theta)-log(1+exp(X%*%theta)))
+                              return(R)
                               })
                           },
                           

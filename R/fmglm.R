@@ -62,8 +62,9 @@ fmglm <- R6Class("fmglm",
         },
         
         #' @description Fit the fmglm model
-        fit = function() {
-            result <- private$method$fit()
+        fit = function(algo="em") {
+            result <- private$method$fit(algo=algo)
+            print(result)
             return(self$summary(result))
         }, 
         summary = function(result, digits=3){
@@ -93,14 +94,14 @@ fmglm <- R6Class("fmglm",
           }
           latent <- private$mixer$get_latent()
           estimates <- c(coef(result))
-          npar <- (length(estimates) - latent + 1) / latent 
+          npar <- (length(estimates) - latent) / latent 
           hessian <- attr(result,"details")[,"nhatend"][[1]]
-          sddev <- diag(solve(hessian))
+          sddev <- diag(solve(-hessian))
           tvalue <- estimates/sddev
           pvalue <- pt(tvalue, (nrow(private$X)-1), lower.tail=FALSE)
           p_ast <- add_ast(pvalue)  
-          pi <-  estimates[1:(latent-1)]
-          pi <- c(pi, 1-sum(pi))
+          pi <-  estimates[1:(latent)]
+          pi <- pi/sum(pi)
           pi_list <- list()
           # group everything by components
           sum_df <-  data.frame()
@@ -113,8 +114,8 @@ fmglm <- R6Class("fmglm",
                 label_row <- c(colnames(private$X))
             }
               
-            start_v <- ((l-1)*npar+latent)
-            end_v <- ((l-1)*npar+latent+npar-1)
+            start_v <- ((l-1)*npar+latent+1)
+            end_v <- ((l-1)*npar+latent+npar)
             c_label <- paste("Comp", l, sep=".")
             pi_list[[c_label]]=pi[l]
             content_l <- list(
@@ -132,7 +133,8 @@ fmglm <- R6Class("fmglm",
             sum_df <- rbind(sum_df, content_l)
           }
           #colnames(sum_df) <- label_col
-          total <- list(Coefficients=sum_df, pi=pi_list)
+          logLik <- - result$value
+          total <- list(Coefficients=sum_df, pi=pi_list,logLik=logLik)
           return(total)
         }
     ),

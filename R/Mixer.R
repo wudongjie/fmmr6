@@ -52,20 +52,16 @@ Mixer <- R6Class("Mixer",
                  mix_ll = function(){
                    mll <- function(theta, Y, X, d) {
                      latent <- private$latent
-                     npar <- (length(theta)-1)/latent
+                     npar <- (length(theta)-latent)/latent
                      p = ncol(X)
                      n = nrow(X)
                      l = 0
-                     pi_vector = theta[1:(latent-1)]
-                     theta_matrix = theta[-(1:(latent-1))]
+                     q_vector = theta[1:latent]
+                     pi_vector = q_vector^2/sum(q_vector^2)
+                     theta_matrix = theta[-(1:latent)]
                      for (i in 1:latent) {
-                       if (i==latent) {
-                         l <- l + d[,i]*(log(1-sum(pi_vector)) 
-                                         + private$family[[i]]$gen_density()(theta_matrix[(npar*(i-1)+1):(npar*(i-1)+npar)], Y, X))
-                       } else {
                          l <- l + d[,i]*(log(pi_vector[i]) 
                                          + private$family[[i]]$gen_density()(theta_matrix[(npar*(i-1)+1):(npar*(i-1)+npar)], Y, X))
-                       }
                      }
                      l <- sum(l)
                      return(-l)
@@ -74,14 +70,15 @@ Mixer <- R6Class("Mixer",
                  },
                  post_pr = function(theta, Y, X){
                    latent <- private$latent
-                   npar <- (length(theta)-1)/latent
+                   npar <- (length(theta)-latent)/latent
                    p = ncol(X)
                    n = nrow(X)
                    l = 0
                    counter = 1
-                   pi_vector = theta[1:(latent-1)]
-                   theta_matrix = theta[-(1:(latent-1))]
-                   pi_matrix = diag(c(pi_vector, 1-sum(pi_vector)))
+                   q_vector = theta[1:latent]
+                   pi_vector = q_vector^2/sum(q_vector^2)
+                   theta_matrix = theta[-(1:latent)]
+                   pi_matrix = diag(pi_vector)
                    z_matrix = matrix(0, nrow=n,ncol=latent)
                    for (i in 1:latent) {
                      z_matrix[,i] = exp(private$family[[i]]$gen_density()(theta_matrix[(npar*(i-1)+1):(npar*(i-1)+npar)],Y,X))
@@ -132,10 +129,10 @@ Mixer <- R6Class("Mixer",
                        cmin <- constr$lower[i]
                        cmax <- constr$upper[i]
                        if (is.infinite(cmin)) {
-                         cmin <- -100
+                         cmin <- -2
                        }
                        if (is.infinite(cmax)) {
-                         cmax <- 100
+                         cmax <- 2
                        }
                        start_v[i] <- runif(1, min=cmin, max=cmax)
                      }
@@ -164,8 +161,8 @@ Mixer <- R6Class("Mixer",
                      constr = private$family$gen_constraint
                      return(constr)
                    } else {
-                     constr_pi_l = rep(0, (latent-1))
-                     constr_pi_h = rep(1, (latent-1))
+                     constr_pi_l = rep(-Inf, latent)
+                     constr_pi_h = rep(+Inf, latent)
                      constr = function(X){
                        mix_l = constr_pi_l
                        mix_h = constr_pi_h

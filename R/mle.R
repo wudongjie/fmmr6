@@ -65,13 +65,15 @@ mle <- R6Class("mle",
               grad <- gen_gr(ll)
               constraint <- private$family$gen_constraint(private$X)
               if (private$method == "L-BFGS-B") {
-              result <- optimx(private$start, ll, gr=grad,
-                               lower=constraint$lower,
-                               upper=constraint$upper,
-                               method="L-BFGS-B")
+              result <- suppressWarnings(optim(private$start, ll, gr=grad,
+                               #lower=constraint$lower,
+                               #upper=constraint$upper,
+                               method="L-BFGS-B", 
+                               control = list(parscale = c(1, colMeans(private$X)))))
               } else if (private$method == "Nelder-Mead") {
-              result <- optimx(private$start, ll,
-                               method="Nelder-Mead")
+              result <- suppressWarnings(optim(private$start, ll,
+                               method="Nelder-Mead",
+                               control = list(parscale = c(1, colMeans(private$X)))))
               } else if (private$method == "Newton-Raphson") {
                 result <- newtonsys(grad, private$start)$zero
               }

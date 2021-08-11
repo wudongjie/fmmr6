@@ -36,25 +36,30 @@ em <- R6Class("em",
                      private$constraint <- private$mixer$gen_constraint()(private$X)
                    }
                  },
-                 fit = function(){
+                 fit = function(algo="em"){
                    likelihood_func <- private$mixer$mix_ll()
-                   #z <- self$estep(private$start)
-                   #z <- self$cstep(z)
-                   z <- vectorize_dummy(kmeans(private$Y, private$latent)$cluster)
+                   z <- vectorize_dummy(kmeans(cbind(private$Y,private$X), 
+                                               private$latent)$cluster)
                    theta_update <- self$mstep(likelihood_func, z, private$start)
-                   theta_update <- c(coef(theta_update))
-                   print(z)
-                   print(theta_update)
+                   #theta_update <- c(coef(theta_update))
+                   theta_update <- theta_update$par
                    convergence <- 1
                    ll_value <- 0
                    counter <- 0
                    while(convergence > 1e-4) {
                      z <- self$estep(theta_update)
-                     #z <- self$cstep(z)
+                     if (algo=='cem') {
+                       z <- self$cstep(z)
+                     } else if (algo=='sem') {
+                       z <- self$sstep(z)
+                     }
                      result <- self$mstep(likelihood_func, z, theta_update)
-                     theta_update <- c(coef(result))
-                     convergence <- abs(result$value - ll_value)
-                     ll_value <- result$value
+                     #theta_update <- c(coef(result))
+                     theta_update <- result$par
+                     #convergence <- abs(result$value - ll_value)
+                     #ll_value <- result$value
+                     convergence <- abs(result$objective - ll_value)
+                     ll_value <- result$objective
                      counter <- counter + 1
                    }
                    print(paste0("convergence after ", counter, " iterations"))
@@ -75,6 +80,13 @@ em <- R6Class("em",
                    }
                    return(t(apply(hidden,1,assign_func)))
                  },
+                 sstep = function(hidden) {
+                   assign_func = function(postpr) {
+                     vec <- rmultinom(1:length(postpr), size=1,prob=postpr)
+                     return(vec)
+                   }
+                   return(t(apply(hidden,1,assign_func)))
+                 },
                  #' @description Given the data, start values, the number
                  #' of latent classes, the indicator variable, the likelihood
                  #' function, solve the maximum value of the likelihood 
@@ -90,14 +102,19 @@ em <- R6Class("em",
                    gr1 <- gen_gr(ll)
                    lower <-  private$constraint$lower
                    upper <-  private$constraint$upper
-                   result <- optimx(theta, ll, gr=gr1,method="L-BFGS-B",
-                                    lower=lower, upper=upper, hessian=T)#,
+                   #result <- optimx(theta, ll, method="L-BFGS-B", hessian=T)
+                                    #lower=lower, upper=upper, hessian=T)#,
                                     #control=list(starttests=F))
                    
-                   # result <- suppressWarnings(optimx(theta, ll, method="Nelder-Mead",
-                   #                                    hessian=T))
-                   #browser()
+                   #result <- suppressWarnings(optimx(theta, ll, method="Nelder-Mead",
+                   #                                  hessian=T))
                    # result <- list(coefficients=newtonsys(gr1, theta)$zero)
+                   # result <- optim(theta, ll, gr=gr1, method="Nelder-Mead")
+                   # result <- suppressWarnings(optim(theta, ll, gr=gr1, method="L-BFGS-B",
+                   #                                 hessian=T)) 
+                   result <- suppressWarnings(nlminb(theta, ll, gradient=gr1, control=list(factr=1e-12, maxit=1000)))
+                                                    #control = list(parscale=c(1,1,colMeans(private$X), colMeans(private$X)))))
+                                   #control = list(parscale = c(1,1,1,colMeans(private$X),1,colMeans(private$X))))
                    return(result)
                  }
                  ),
