@@ -5,6 +5,9 @@
 \title{An Abstract Class for Estimation Methods}
 \value{
 No return.
+@description
+The initialize function for the AbstractMethod class:
+This abstract class cannot be initialized
 }
 \description{
 An abstract class for estimation methods which cannot be initialized.
@@ -28,6 +31,12 @@ Dongjie Wu
 \if{html}{\out{<div class="r">}}\preformatted{AbstractMethod$new()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+The function will return an error.
+@description
+The fit function for the AbstractMethod class:
+This abstract class cannot be initialized
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-fit"></a>}}
@@ -37,6 +46,9 @@ Dongjie Wu
 \if{html}{\out{<div class="r">}}\preformatted{AbstractMethod$fit()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+The function will return an error.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

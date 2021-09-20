@@ -6,15 +6,21 @@
 #'
 #' @name fmmr6
 #'
-#' @return
-#'
-#' @export
+#' @return No return
 
 fmmr6 <- R6Class("fmmr6",
                  public = list(
+                   #' @description
+                   #' Create a new instance of this [R6] [R6::R6Class] class.
                    initialize = function(){stop("This is an abstract class that can't be initialized.")},
+                   #' @description 
+                   #' Fit the fmmr6 model
                    fit = function(){stop()},
+                   #' @description 
+                   #' Generate a summary for the result.
                    summarize = function(){stop("This is the summary")},
+                   #' @description 
+                   #' Predict the outcome given the fitted model.
                    predict = function(){stop()}
                  ),
                  private = list(

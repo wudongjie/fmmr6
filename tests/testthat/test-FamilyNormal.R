@@ -19,31 +19,29 @@ test_that("density function", {
 test_that("test start value", {
   x1 <- rnorm(1000, mean=1, sd=1)
   x2 <- rnorm(1000, mean=1, sd=1)
+  y <- 3*x1 + 2*x2
   X <- matrix(data = c(x1,x2), ncol=2)
-  normal1 <- FamilyNormal$new()$gen_start
+  normal1 <- FamilyNormal$new()$gen_start()
   expect_true(is.function(normal1))
-  start_actual <- normal1(X)
-  start_expect <- c(1, 1, 1)
-  expect_equal(start_actual, start_expect)
-  start_actual2 <- normal1(x1)
-  start_expect2 <- c(1, 1)
-  expect_equal(start_actual2, start_expect2)
+  start_actual <- normal1(y, X)
+  start_expect <- c(3, 1)
+  expect_equal(dim(start_actual), start_expect)
+  start_actual2 <- normal1(y, x2)
+  start_expect2 <- c(2, 1)
+  expect_equal(dim(start_actual2), start_expect2)
 })
 
 
 test_that("test constraint", { 
   x1 <- rnorm(1000, mean=1, sd=1)
   x2 <- rnorm(1000, mean=1, sd=1)
+  y <- 3*x1 + 2*x2
   X <- matrix(data = c(x1,x2), ncol=2)
   normal1 <- FamilyNormal$new()$gen_constraint
   expect_true(is.function(normal1))
-  con_actual <- normal1(X)
-  con_expect <- list(lower=c(0,-Inf,-Inf),
-                       upper=c(+Inf,+Inf,+Inf))
-  expect_equal(con_actual, con_expect)
-  con_actual2 <- normal1(x1)
-  con_expect2 <- list(lower=c(0,-Inf),
-                      upper=c(+Inf,+Inf))
-  expect_equal(con_actual2, con_expect2)
+  con_actual <- normal1(y, X)
+  expect_equal(dim(con_actual$lower), c(3, 1))
+  con_actual2 <- normal1(y, x1)
+  expect_equal(dim(con_actual2$lower), c(2,1))
 })
 

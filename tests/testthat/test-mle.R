@@ -32,8 +32,7 @@ test_that("test fit", {
   minusll <- function(sigma, theta1, theta2, theta3) {
     -sum(dnorm(y2, mean = theta1 + x1*theta2 + x2*theta3, 
                sd = sigma, log = TRUE))}
-  mle_result <- suppressWarnings(stats4::mle(minusll, start=list(sigma=1,theta1=4,theta2=2,theta3=3),  
-                                             control = list(parscale = c(1, 1, mean(x1), mean(x2)))))
+  mle_result <- suppressWarnings(stats4::mle(minusll, start=list(sigma=1,theta1=4,theta2=2,theta3=3)))
   mle_coef <- stats4::coef(mle_result)[-1]
   names(mle_coef) <- c("(Intercept)", "x1", "x2")
   mod2 <- mle$new(y2, X2, family="gaussian", start=c(1,2,3,4))$fit()
@@ -51,14 +50,10 @@ test_that("test fit", {
   mle_coef2 <- stats4::coef(mle_result2)[-1]
   names(mle_coef2) <- c("(Intercept)", "x1", "x2", "x3")
   mod3 <- mle$new(y3, X3, family="gaussian", start=c(1,4,2,3,4))$fit()
-  mod3_n <- mle$new(y3, X3, family="gaussian",
-                    start=c(1,4,2,3,4), method="Nelder-Mead")$fit()
+
   expect_equal(mle_coef2, lm3$coefficients, tolerance=1e-1)
   expect_equal(mle_result2@details$value, mod3$value, tolerance=1e-3)
-  expect_equal(mle_result2@details$value, mod3_n$value, tolerance=1e-3)
-  print(mle_result2)
-  print(mod3)
-  print(mod3_n)
+
 })
 
 

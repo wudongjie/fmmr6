@@ -9,8 +9,7 @@
 #' @name Family
 #'
 #' @return No return.
-#'
-#' @export
+
 
 Family <- R6Class("Family",
                           public = list(

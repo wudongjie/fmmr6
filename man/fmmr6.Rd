@@ -4,7 +4,7 @@
 \alias{fmmr6}
 \title{The Abstract Class of Finite Mixture Models on R6 (fmmr6)}
 \value{
-
+No return
 }
 \description{
 An abstract R6Class for the Finite Mixture Models.
@@ -26,6 +26,7 @@ Dongjie Wu
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
+Create a new instance of this \link{R6} \link[R6:R6Class]{R6::R6Class} class.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{fmmr6$new()}\if{html}{\out{</div>}}
 }
@@ -35,6 +36,7 @@ Dongjie Wu
 \if{html}{\out{<a id="method-fit"></a>}}
 \if{latex}{\out{\hypertarget{method-fit}{}}}
 \subsection{Method \code{fit()}}{
+Fit the fmmr6 model
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{fmmr6$fit()}\if{html}{\out{</div>}}
 }
@@ -44,6 +46,7 @@ Dongjie Wu
 \if{html}{\out{<a id="method-summarize"></a>}}
 \if{latex}{\out{\hypertarget{method-summarize}{}}}
 \subsection{Method \code{summarize()}}{
+Generate a summary for the result.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{fmmr6$summarize()}\if{html}{\out{</div>}}
 }
@@ -53,6 +56,7 @@ Dongjie Wu
 \if{html}{\out{<a id="method-predict"></a>}}
 \if{latex}{\out{\hypertarget{method-predict}{}}}
 \subsection{Method \code{predict()}}{
+Predict the outcome given the fitted model.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{fmmr6$predict()}\if{html}{\out{</div>}}
 }

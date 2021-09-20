@@ -21,6 +21,8 @@ Dongjie Wu
 \item \href{#method-new}{\code{em$new()}}
 \item \href{#method-fit}{\code{em$fit()}}
 \item \href{#method-estep}{\code{em$estep()}}
+\item \href{#method-cstep}{\code{em$cstep()}}
+\item \href{#method-sstep}{\code{em$sstep()}}
 \item \href{#method-mstep}{\code{em$mstep()}}
 \item \href{#method-clone}{\code{em$clone()}}
 }
@@ -37,17 +39,29 @@ Dongjie Wu
 \subsection{Method \code{new()}}{
 Create a new instance of this \link{R6} \link[R6:R6Class]{R6::R6Class} class.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{em$new(likelihood_func, Y, X, latent, start = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{em$new(mixer, Y, X, start = NULL, constraint = NULL, glm_fit = F)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{likelihood_func}}{\code{formula(1)} \cr
-The Likelihood function to be used in the EM algorithm.}
+\item{\code{mixer}}{\code{Mixer(1)} \cr
+A mixer object contains the mixed density function of the model.}
 
-\item{\code{start}}{\code{vector(1)} \cr
-The vector of start values for the EM algorithm.}
+\item{\code{Y}}{\code{matrix(1)} \cr
+A matrix with 1 or k columns contains the dependent variable/variables.}
+
+\item{\code{X}}{\code{matrix(1)} \cr
+A matrix with m column contains m independent variables.}
+
+\item{\code{start}}{\code{matrix(1)} \cr
+The matrix of start values for the EM algorithm.}
+
+\item{\code{constraint}}{\code{matrix(1)} \cr
+The matrix of constraint values for the EM algorithm}
+
+\item{\code{glm_fit}}{\code{boolean(1)} \cr
+Whether use the \code{glm.fit()}, \code{ols.wfit()} or \code{nnet()} to fit the model.}
 }
 \if{html}{\out{</div>}}
 }
@@ -59,10 +73,41 @@ Return a R6 object of class em.
 \if{html}{\out{<a id="method-fit"></a>}}
 \if{latex}{\out{\hypertarget{method-fit}{}}}
 \subsection{Method \code{fit()}}{
+Fit the model using the EM algorithm
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{em$fit()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{em$fit(algo = "em", max_iter = 500, start = "kmeans", rep = 1)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{algo}}{\code{character(1)} \cr
+Specify the type of EM algorithm to use. Can choose \code{em} stands for the
+conventional EM algorithm, \code{cem} stands for the classification EM algorithm,
+and \code{sem} stands for the stochastic EM algorithm.
+The default algorithm is \code{em}.}
+
+\item{\code{max_iter}}{\code{numeric(1)} \cr
+Specify the maximum number of iterations for the E-step-M-step loop.
+The default number is 500.}
+
+\item{\code{start}}{\code{character(1)} \cr
+Specify the starting method of the EM algorithm.
+Can either start from \code{kmeans} or \code{random}.
+\code{kmeans} use the K-mean methods to put samples into latent classes.
+\code{random} randomly assigns samples into latent classes.
+The default method is \code{kmeans}.}
+
+\item{\code{rep}}{\code{numeric(1)} \cr
+Specify the number of reps EM-algorithm runs.
+This parameter is designed for preventing the local maximum.
+Each rep, the EM_algorithm generates a start.
+It is only useful when \code{start} is \code{random}.
+After all reps, the algorithm will pick the rep with maximum log likelihood.
+The default value is 1}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-estep"></a>}}
@@ -70,11 +115,63 @@ Return a R6 object of class em.
 \subsection{Method \code{estep()}}{
 Given the data, start values, the number
 of latent classes, compute the expected value of
-the indicator variable
+the indicator variable.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{em$estep(Y, X, latent, start)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{em$estep(theta_update, pi_vector)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{theta_update}}{\code{matrix(1)} \cr
+Updated coefficients}
+
+\item{\code{pi_vector}}{\code{matrix(1)} \cr
+The matrix with the diagonal values representing the prior probability \verb{\\pi}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+return the probability matrix indicating the posterior probability of individual belonging to each class.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cstep"></a>}}
+\if{latex}{\out{\hypertarget{method-cstep}{}}}
+\subsection{Method \code{cstep()}}{
+Given the posterior probability, generate a matrix to assign
+each individual to a class. The assignment based on which probability is the largest.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{em$cstep(hidden)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{hidden}}{\code{matrix(1)} \cr
+The matrix of the posterior probability}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-sstep"></a>}}
+\if{latex}{\out{\hypertarget{method-sstep}{}}}
+\subsection{Method \code{sstep()}}{
+Given the posterior probability, generate a matrix to assign
+each individual to a class. The assignment is randomly sampled based on the posterior probability.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{em$sstep(hidden)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{hidden}}{\code{matrix(1)} \cr
+The matrix of the posterior probability}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-mstep"></a>}}
@@ -85,9 +182,26 @@ of latent classes, the indicator variable, the likelihood
 function, solve the maximum value of the likelihood
 function and update the parameter vectors theta.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{em$mstep(Y, X, latent, d, start, likelihood_func)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{em$mstep(likelihood_func, hidden, theta, glm_fit = FALSE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{likelihood_func}}{\verb{function(1)} \cr
+The likelihood function to maximize.}
+
+\item{\code{hidden}}{\code{matrix(1)} \cr
+The matrix of the posterior probability.}
+
+\item{\code{theta}}{\code{matrix(1)} \cr
+The matrix of the coefficients to fit.}
+
+\item{\code{glm_fit}}{\code{boolean(1)} \cr
+Whether use the \code{glm.fit()}, \code{ols.wfit()} or \code{nnet()} to fit the model.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

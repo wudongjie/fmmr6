@@ -1,18 +1,16 @@
 test_that("test e-step", {
   x1 <- rnorm(100, mean=1, sd=1)
   x2 <- rnorm(100, mean=1, sd=1)
-  theta <- c(6,8,1,1,2,1,2,3)
+  theta <- matrix(c(1,1,2,1,2,3), ncol=1)
+  pi_v <- c(0.36, 0.64)
   Y <- matrix(1, nrow=100, ncol=1)
-  Y[1:36] <- theta[4]*x1[1:36] + theta[5]*x2[1:36]
-  Y[37:100] <- theta[7]*x1[37:100]+theta[8]*x2[37:100]
+  Y[1:36] <- theta[2,1]*x1[1:36] + theta[3,1]*x2[1:36]
+  Y[37:100] <- theta[5,1]*x1[37:100]+theta[6,1]*x2[37:100]
   X <- matrix(c(x1,x2),ncol = 2)
   latent <- 2
-  #mod1 <- FamilyMNormal$new(Y, X, latent)
   mix1 <-  Mixer$new(family="gaussian", latent=2)
-  y_result <- em$new(mix1, Y, X)$estep(theta)
-  print(y_result)
+  y_result <- em$new(mix1, Y, X)$estep(theta, pi_v)
   z <- vectorize_dummy(kmeans(cbind(Y,X), 2)$cluster)
-  print(colSums(z))
   y_expect <- c(36, 64)
   expect_equal(colSums(y_result), y_expect, tolerance=1e-1)
   sum_to_1 = rep(c(1),100)
@@ -23,21 +21,19 @@ test_that("test e-step", {
 test_that("test m-step", {
   x1 <- rnorm(1000, mean=0, sd=1)
   x2 <- rnorm(1000, mean=0, sd=1)
-  theta <- c(6,8,1,2,5,1,4,3)
+  theta <- matrix(c(1,2,5,1,4,3), ncol=1)
+  pi_v <- c(0.36, 0.64)
   Y <- matrix(1, nrow=1000, ncol=1)
-  Y[1:360] <- theta[4]*x1[1:360] + theta[5]*x2[1:360]
-  Y[361:1000] <- theta[7]*x1[361:1000]+theta[8]*x2[361:1000]
+  Y[1:360] <- theta[2,1]*x1[1:360] + theta[3,1]*x2[1:360]
+  Y[361:1000] <- theta[5,1]*x1[361:1000]+theta[6,1]*x2[361:1000]
   X <- matrix(c(x1,x2),ncol = 2)
   latent <- 2
   mix1 <- Mixer$new(family="gaussian", latent=2)
   em1 <- em$new(mix1, Y, X)
-  y_result <- em1$estep(theta)
-  print("result of e step")
-  print(y_result)
-  print(colSums(y_result))
+  y_result <- em1$estep(theta, pi_v)
   ll <- mix1$mix_ll()
   result <- em1$mstep(ll, y_result, theta)
-  print(result)
+  expect_equal(result$par, matrix(theta, ncol=1), tolerance = 0.1)
 })
 
 
@@ -47,20 +43,18 @@ test_that("test fit", {
   NPreg$x2 <- (NPreg$x)^2
   formula <- yn~x+x2
   z <- kmeans(NPreg$yn, 2)
-  print(z)
   Y <-  model.frame(formula, NPreg)[,1]
   X <- model.matrix(formula, NPreg)
-  start1 <- c(5,5,3,0.2,1,3,5,5,2,2)
-  start2 <- c(5,5,1,1,1,1,1,1,1,1)
+  start1 <- matrix(c(3,0.2,1,3,5,5,2,2), ncol=1)
+  start2 <- c(1,1,1,1,1,1,1,1)
+  pi_v <- c(0.5, 0.5)
   mix1 <- Mixer$new(family="gaussian", latent=2)
   em1 <- em$new(mix1, Y, X, start=start1)
-  browser()
   result <- em1$fit(algo="em")
-  mod2 <- flexmix::flexmix(yn~x+x2, data=NPreg, k=2) #control = list(classify = "random"))
-  print(result)
-  print(mod2)
-  print(parameters(mod2, component=1))
-  print(parameters(mod2, component=2))
-  print(mod2@logLik)
+  mod2 <- flexmix::flexmix(yn~x+x2, data=NPreg, k=2) 
+  result_mod2 <- rbind(parameters(mod2, component=1), 
+                       parameters(mod2, component=2))
+  print(result$par)
+  print(result_mod2)
 })
 

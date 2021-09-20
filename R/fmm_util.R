@@ -5,10 +5,9 @@ partial <- function(f, ...) {
   }
 }
 
-
 gen_gr = function(ll) {
   gr <- function(theta) {
-    g <- grad(ll,theta)
+    g <- numDeriv::grad(ll,theta)
     return(g)
   }
   return(gr)

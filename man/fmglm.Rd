@@ -20,6 +20,7 @@ Dongjie Wu
 \itemize{
 \item \href{#method-new}{\code{fmglm$new()}}
 \item \href{#method-fit}{\code{fmglm$fit()}}
+\item \href{#method-summarize}{\code{fmglm$summarize()}}
 \item \href{#method-clone}{\code{fmglm$clone()}}
 }
 }
@@ -27,7 +28,6 @@ Dongjie Wu
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
 \item \out{<span class="pkg-link" data-pkg="fmmr6" data-topic="fmmr6" data-id="predict">}\href{../../fmmr6/html/fmmr6.html#method-predict}{\code{fmmr6::fmmr6$predict()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="fmmr6" data-topic="fmmr6" data-id="summarize">}\href{../../fmmr6/html/fmmr6.html#method-summarize}{\code{fmmr6::fmmr6$summarize()}}\out{</span>}
 }
 \out{</details>}
 }
@@ -40,12 +40,13 @@ Create a new instance of this \link{R6} \link[R6:R6Class]{R6::R6Class} class.
 \if{html}{\out{<div class="r">}}\preformatted{fmglm$new(
   formula,
   data,
-  link = "identity",
-  latent = 1,
-  method = "mle",
+  family = "gaussian",
+  latent = 2,
+  method = "em",
   start = NULL,
-  intercept = TRUE,
-  family = "gaussian"
+  glm_fit = F,
+  use_llc = T,
+  mn_base = 1
 )}\if{html}{\out{</div>}}
 }
 
@@ -58,8 +59,9 @@ The formula/expression of the model to fit in the fmglm}
 \item{\code{data}}{\code{data(1)} \cr
 The Data used in the fmglm}
 
-\item{\code{link}}{\code{character(1)} \cr
-The link function in the fmglm}
+\item{\code{family}}{\code{character(1)} \cr
+The distribution family which can be either a string like "gaussian"
+or a vector like \code{c("gaussian", "poisson")}}
 
 \item{\code{latent}}{\code{numeric(1)} \cr
 The number of latent classes}
@@ -70,12 +72,16 @@ The estimation method to fit the fmglm}
 \item{\code{start}}{\code{matrix(1)} \cr
 The starting values for the fmglm}
 
-\item{\code{intercept}}{\code{bool(1)} \cr
-Whether the model includes an intercept,
-the default is TRUE.}
+\item{\code{glm_fit}}{\code{Boolean(1)} \cr
+Whether use the \code{glm.fit()}, \code{ols.wfit()} or \code{nnet()} to fit the model.
+The default is \code{FALSE}.}
 
-\item{\code{family}}{\code{character(1)} \cr
-The distribution family}
+\item{\code{use_llc}}{\code{Boolean(1)} \cr
+Whether to use the complete log-likelihood to fit the model.
+The default is \code{TRUE}.}
+
+\item{\code{mn_base}}{\code{integer(1)} \cr
+Determine which column of the multinomial variable is set to be the base group.}
 }
 \if{html}{\out{</div>}}
 }
@@ -89,9 +95,58 @@ Return a R6 object of class fmglm
 \subsection{Method \code{fit()}}{
 Fit the fmglm model
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{fmglm$fit()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{fmglm$fit(algo = "em", max_iter = 500, start = "kmeans", rep = 1)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{algo}}{\code{character(1)} \cr
+The algorithm used in fitting the fmglm model.
+The default algorithm is \code{em} standing for the normal EM algorithm.
+One can choose from \code{c("em", "cem", "sem")}.
+\code{cem} is the classification EM algorithm.
+\code{sem} is the stochastic EM algorithm.}
+
+\item{\code{max_iter}}{\code{numeric(1)} \cr
+Specify the maximum number of iterations for the E-step-M-step loop.
+The default number is 500.}
+
+\item{\code{start}}{\code{character(1)} \cr
+Specify the starting method of the EM algorithm.
+Can either start from \code{kmeans} or \code{random}.
+\code{kmeans} use the K-mean methods to put samples into latent classes.
+\code{random} randomly assigns samples into latent classes.
+The default method is \code{kmeans}.}
+
+\item{\code{rep}}{\code{numeric(1)} \cr
+Specify the number of reps EM-algorithm runs.
+This parameter is designed for preventing the local maximum.
+Each rep, the EM_algorithm generates a start.
+It is only useful when \code{start} is \code{random}.
+After all reps, the algorithm will pick the rep with maximum log likelihood.
+The default value is 1}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-summarize"></a>}}
+\if{latex}{\out{\hypertarget{method-summarize}{}}}
+\subsection{Method \code{summarize()}}{
+Generate a summary for the result.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{fmglm$summarize(digits = 3)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{digits}}{\code{integer(1)} \cr
+Determine how many digits presented in the output.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

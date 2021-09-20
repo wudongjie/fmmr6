@@ -19,6 +19,8 @@ Dongjie Wu
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{mle$new()}}
+\item \href{#method-gen_family}{\code{mle$gen_family()}}
+\item \href{#method-gen_ll}{\code{mle$gen_ll()}}
 \item \href{#method-fit}{\code{mle$fit()}}
 \item \href{#method-clone}{\code{mle$clone()}}
 }
@@ -35,14 +37,26 @@ Dongjie Wu
 \subsection{Method \code{new()}}{
 Create a new instance of this \link{R6} \link[R6:R6Class]{R6::R6Class} class.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{mle$new(family, start = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{mle$new(Y, X, family, method = "L-BFGS-B", start = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{Y}}{\code{matrix(1)} \cr
+The dependent variable.}
+
+\item{\code{X}}{\code{matrix(1)} \cr
+The independent variables.}
+
 \item{\code{family}}{\code{formula(1)} \cr
 The distribution family to be used in the maximum likehood estimation.}
+
+\item{\code{method}}{\code{character(1)} \cr
+The optimization method used in the MLE. The default is \code{L-BFGS-B}.}
+
+\item{\code{start}}{\code{matrix(1)} \cr
+Specify the start value for the MLE. The default is \code{NULL}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -51,13 +65,62 @@ Return a R6 object of class mle
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-gen_family"></a>}}
+\if{latex}{\out{\hypertarget{method-gen_family}{}}}
+\subsection{Method \code{gen_family()}}{
+Given the \code{family} variable and number of classes,
+generate a \code{Family} objects.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{mle$gen_family(family)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{family}}{\code{character(1)} \cr
+The family variable.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-gen_ll"></a>}}
+\if{latex}{\out{\hypertarget{method-gen_ll}{}}}
+\subsection{Method \code{gen_ll()}}{
+Generate the likelihood function given the density function.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{mle$gen_ll(density_func)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{density_func}}{\verb{function(1)} \cr
+The density function.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-fit"></a>}}
 \if{latex}{\out{\hypertarget{method-fit}{}}}
 \subsection{Method \code{fit()}}{
+Fit the MLE.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{mle$fit()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{mle$fit(latent = 1, algo = "mle", ...)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{latent}}{\code{integer(1)} \cr
+Latent class variable. Default is 1.}
+
+\item{\code{algo}}{\code{character(1)} \cr
+The algorithm used. The default is \code{mle}.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

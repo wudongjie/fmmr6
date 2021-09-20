@@ -14,6 +14,8 @@
 FamilyNormal <- R6Class("FamilyNormal",
                                      inherit = Family,
                                      public = list(
+                                       #' @description
+                                       #' Creates a new instance of this [R6][R6::R6Class] class.
                                        initialize = function() {
                                        },
                                        
@@ -22,15 +24,19 @@ FamilyNormal <- R6Class("FamilyNormal",
                                        gen_density = function() {
                                          return(function(theta, Y, X) {dnorm(Y, 
                                                                       mean = X %*% theta[-1], 
-                                                                      sd = sqrt(theta[1]^2), log = TRUE)})
+                                                                      sd = sqrt(theta[1]^2), log = T)})
                                        },
                                        
                                        #' @description 
-                                       #' Generate the start value
+                                       #' Generate the start value                    
+                                       #' @param Y `matrix(1)` \cr
+                                       #' A matrix with 1 column contains the dependent variable.
+                                       #' @param X `matrix(1)` \cr
+                                       #' A matrix with m column contains m independent variables.
                                        gen_start = function() {
-                                         start = function(X){
-                                           constr = self$gen_constraint(X)
-                                           start_v = rep(1, length(constr$lower))
+                                         start = function(Y, X){
+                                           constr = self$gen_constraint(Y, X)
+                                           start_v = matrix(rep(1, length(constr$lower)))
                                            for (i in 1:length(constr$lower))
                                            {
                                              cmin <- constr$lower[i]
@@ -47,24 +53,26 @@ FamilyNormal <- R6Class("FamilyNormal",
                                          }
                                          return(start)
                                        },
-                                       predict = function() {
-                                         
-                                       },
+                                       
                                        
                                        #' @description 
-                                       #' Generate the constraint
-                                       gen_constraint = function(X) {
+                                       #' Generate the constraint                    
+                                       #' @param Y `matrix(1)` \cr
+                                       #' A matrix with 1 column contains the dependent variable.
+                                       #' @param X `matrix(1)` \cr
+                                       #' A matrix with m column contains m independent variables.
+                                       gen_constraint = function(Y, X) {
                                          if (is.vector(X)) {
                                            l <- list(
-                                             lower = c(0, -Inf),
-                                             upper = c(+Inf, +Inf)
+                                             lower = matrix(c(0, -Inf)),
+                                             upper = matrix(c(+Inf, +Inf))
                                            )
                                            return(l)
                                          }
                                          else {
                                            l <- list(
-                                             lower = c(0, rep(-Inf, ncol(X))),
-                                             upper = c(+Inf, rep(+Inf, ncol(X)))
+                                             lower = matrix(c(0, rep(-Inf, ncol(X)))),
+                                             upper = matrix(c(+Inf, rep(+Inf, ncol(X))))
                                            )
                                            return(l)
                                          }

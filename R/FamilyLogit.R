@@ -14,11 +14,18 @@
 FamilyLogit <- R6Class("FamilyLogit",
                         inherit = Family,
                         public = list(
+                          #' @description
+                          #' Creates a new instance of this [R6][R6::R6Class] class.
                           initialize = function() {
                           },
                           
                           #' @description 
                           #' Generate the density function
+                          #' @param Y `matrix(1)` \cr
+                          #' A matrix with 1 column contains the dependent variable.
+                          #' @param X `matrix(1)` \cr
+                          #' A matrix with m column contains m independent variables.
+                          #' @return this function returns the density function of the logistic regression.
                           gen_density = function() {
                             return(function(theta, Y, X) {
                               R = suppressWarnings(Y*(X%*%theta)-log(1+exp(X%*%theta)))
@@ -28,25 +35,33 @@ FamilyLogit <- R6Class("FamilyLogit",
                           
                           #' @description 
                           #' Generate the start value
-                          gen_start = function(X) {
-                            if (is.vector(X)) {return(c(1))}
-                            else {return(rep(1, (ncol(X))))}
+                          #' @param Y `matrix(1)` \cr
+                          #' A matrix with 1 column contains the dependent variable.
+                          #' @param X `matrix(1)` \cr
+                          #' A matrix with m column contains m independent variables.
+                          gen_start = function(Y, X) {
+                            if (is.vector(X)) {return(matrix(c(1)))}
+                            else {return(matrix(rep(1, (ncol(X)))))}
                           },
                           
                           #' @description 
                           #' Generate the constraint
-                          gen_constraint = function(X) {
+                          #' @param Y `matrix(1)` \cr
+                          #' A matrix with 1 column contains the dependent variable.
+                          #' @param X `matrix(1)` \cr
+                          #' A matrix with m column contains m independent variables.
+                          gen_constraint = function(Y, X) {
                             if (is.vector(X)) {
                               l <- list(
-                                lower = c(-Inf),
-                                upper = c(+Inf)
+                                lower = matrix(c(-Inf)),
+                                upper = matrix(c(+Inf))
                               )
                               return(l)
                             }
                             else {
                               l <- list(
-                                lower = rep(-Inf, ncol(X)),
-                                upper = rep(+Inf, ncol(X))
+                                lower = matrix(rep(-Inf, ncol(X))),
+                                upper = matrix(rep(+Inf, ncol(X)))
                               )
                               return(l)
                             }

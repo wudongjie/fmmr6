@@ -5,6 +5,9 @@
 \title{An Abstract Class for Distribution Families}
 \value{
 No return.
+@description
+The initialize function for the Family class:
+This class cannot be initialized
 }
 \description{
 An abstract class for Distribution Families
@@ -17,8 +20,9 @@ Dongjie Wu
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{Family$new()}}
-\item \href{#method-gen_ll}{\code{Family$gen_ll()}}
-\item \href{#method-gen_gr}{\code{Family$gen_gr()}}
+\item \href{#method-gen_density}{\code{Family$gen_density()}}
+\item \href{#method-gen_start}{\code{Family$gen_start()}}
+\item \href{#method-gen_constraint}{\code{Family$gen_constraint()}}
 \item \href{#method-clone}{\code{Family$clone()}}
 }
 }
@@ -35,24 +39,32 @@ The function will return an error.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-gen_ll"></a>}}
-\if{latex}{\out{\hypertarget{method-gen_ll}{}}}
-\subsection{Method \code{gen_ll()}}{
-Generate a log-likelihood function for the
-distribution family.
+\if{html}{\out{<a id="method-gen_density"></a>}}
+\if{latex}{\out{\hypertarget{method-gen_density}{}}}
+\subsection{Method \code{gen_density()}}{
+Generate the density function
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Family$gen_ll()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Family$gen_density()}\if{html}{\out{</div>}}
 }
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-gen_gr"></a>}}
-\if{latex}{\out{\hypertarget{method-gen_gr}{}}}
-\subsection{Method \code{gen_gr()}}{
-Generate a gradient function for the
-distribution family.
+\if{html}{\out{<a id="method-gen_start"></a>}}
+\if{latex}{\out{\hypertarget{method-gen_start}{}}}
+\subsection{Method \code{gen_start()}}{
+Generate the start value
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Family$gen_gr()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Family$gen_start()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-gen_constraint"></a>}}
+\if{latex}{\out{\hypertarget{method-gen_constraint}{}}}
+\subsection{Method \code{gen_constraint()}}{
+Generate the constraint
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Family$gen_constraint()}\if{html}{\out{</div>}}
 }
 
 }
