@@ -4,6 +4,7 @@
 #'
 #' @description An abstract R6Class for the Finite Mixture Models.
 #'
+#' @template section_fmmr6_intro
 #' @name fmmr6
 #'
 #' @return No return

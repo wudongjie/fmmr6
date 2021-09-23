@@ -9,6 +9,33 @@ No return
 \description{
 An abstract R6Class for the Finite Mixture Models.
 }
+\section{The R6 Structure of the \code{fmmr6} Package}{
+
+The \code{fmmr6} package adopts an Object-Oriented (OO) design with the help of \CRANpkg{R6}.
+It contains three main blocks of constructing and fitting a finite mixture model (FMM):
+\itemize{
+\item Finite Mixture Modelling:
+Finite Mixture Modelling can the way we construct our finite mixture models.
+These modelling techniques are organized under \code{fmmr6} class.
+In the current version, we have only developed the mixture of generalized linear models,
+which is the \code{fmglm} class.
+We are going to add more modelling techniques such as the mixture of
+generalized linear models using a panel data structure \code{xtfmglm}.
+\item Methods to fit a FMM models:
+The fitting methods such as EM-algorithm (\code{em}) and Maximum Likelihood Estimation (\code{mle})
+are organized under the \code{AbstractMethod} class. In this way, it is convenient to pickup
+a different method to fit the FMM models.
+\item Families of distributions:
+Different families of distributions are organized under the \code{Family} class.
+Currently, the package only supports Gaussian distributions (\code{FamilyNormal}),
+Poisson distributions (\code{FamilyPoisson}),
+Logit Models with Gaussian distributions (\code{FamilyLogit}),
+and Multinomial Logit Models with Gaussian distributions (\code{FamilyMultiNomial}).
+These distributions will be sent to a \code{Mixer} class to generate a mixture of
+distributions based on the setting of the finite mixture model.
+}
+}
+
 \author{
 Dongjie Wu
 }

@@ -4,6 +4,8 @@
 #'
 #' @description A finite mixture of generalized linear model (GLM)
 #'
+#' @template section_fmglm_intro
+#' 
 #' @name fmglm
 #'
 #' @return Returns R6 object of class fmglm.
@@ -16,26 +18,26 @@ fmglm <- R6Class("fmglm",
     public = list(
         #' @description
         #' Create a new instance of this [R6] [R6::R6Class] class.
-        #' @param formula `formula(1)` \cr
+        #' @param formula (`formula(1)`) \cr
         #' The formula/expression of the model to fit in the fmglm
-        #' @param data `data(1)` \cr
+        #' @param data (`data.frame()`) \cr
         #' The Data used in the fmglm
-        #' @param family `character(1)` \cr
+        #' @param family (`character(1)|character()`) \cr
         #' The distribution family which can be either a string like "gaussian"
         #' or a vector like `c("gaussian", "poisson")`
-        #' @param latent `numeric(1)` \cr
+        #' @param latent (`integer(1)`) \cr
         #' The number of latent classes
-        #' @param method `character(1)` \cr
+        #' @param method (`character(1)`) \cr
         #' The estimation method to fit the fmglm
-        #' @param start `matrix(1)` \cr
+        #' @param start (`matrix()`) \cr
         #' The starting values for the fmglm
-        #' @param glm_fit `Boolean(1)` \cr
+        #' @param glm_fit (`Boolean(1)`) \cr
         #' Whether use the `glm.fit()`, `ols.wfit()` or `nnet()` to fit the model.
         #' The default is `FALSE`.
-        #' @param use_llc `Boolean(1)` \cr
+        #' @param use_llc (`Boolean(1)`) \cr
         #' Whether to use the complete log-likelihood to fit the model.
         #' The default is `TRUE`.
-        #' @param mn_base `integer(1)` \cr
+        #' @param mn_base (`integer(1)`) \cr
         #' Determine which column of the multinomial variable is set to be the base group.
         #' @return Return a R6 object of class fmglm
         initialize = function(formula, data, family="gaussian", latent=2,
@@ -88,22 +90,22 @@ fmglm <- R6Class("fmglm",
         
         #' @description 
         #' Fit the fmglm model
-        #' @param algo `character(1)` \cr
+        #' @param algo (`character(1)`) \cr
         #' The algorithm used in fitting the fmglm model. 
         #' The default algorithm is `em` standing for the normal EM algorithm.
         #' One can choose from `c("em", "cem", "sem")`.
         #' `cem` is the classification EM algorithm.
         #' `sem` is the stochastic EM algorithm.
-        #' @param max_iter `numeric(1)` \cr
+        #' @param max_iter (`integer(1)`) \cr
         #' Specify the maximum number of iterations for the E-step-M-step loop.
         #' The default number is 500.
-        #' @param start `character(1)` \cr
+        #' @param start (`character(1)`) \cr
         #' Specify the starting method of the EM algorithm.
         #' Can either start from `kmeans` or `random`.
         #' `kmeans` use the K-mean methods to put samples into latent classes.
         #' `random` randomly assigns samples into latent classes.
         #' The default method is `kmeans`.
-        #' @param rep `numeric(1)` \cr
+        #' @param rep (`integer(1)`) \cr
         #' Specify the number of reps EM-algorithm runs.
         #' This parameter is designed for preventing the local maximum.
         #' Each rep, the EM_algorithm generates a start.
@@ -118,7 +120,7 @@ fmglm <- R6Class("fmglm",
         },
         #' @description 
         #' Generate a summary for the result.
-        #' @param digits `integer(1)` \cr
+        #' @param digits (`integer(1)`) \cr
         #' Determine how many digits presented in the output.
         summarize = function(digits=3){
           result <- private$result

@@ -54,16 +54,16 @@ Create a new instance of this \link{R6} \link[R6:R6Class]{R6::R6Class} class.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{family}}{\code{formula(1)} \cr
+\item{\code{family}}{(\code{character(1)}) \cr
 The family/families of the mixture model to fit in the fmglm.
 The distribution family can be either a string like
 "gaussian" or a vector like \code{c("gaussian", "poisson")}.
 The default value is \code{gaussian}.}
 
-\item{\code{latent}}{\code{numeric(1)} \cr
+\item{\code{latent}}{(\code{integer(1)}) \cr
 The number of latent classes. The default is 2.}
 
-\item{\code{use_llc}}{\code{boolean(1)} \cr
+\item{\code{use_llc}}{(\code{boolean(1)}) \cr
 Whether to use the complete log-likelihood to fit the model.
 The default is \code{TRUE}.}
 }
@@ -112,7 +112,7 @@ The function to generate the mixed log-likelihood.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_llc}}{\code{boolean(1)} \cr
+\item{\code{use_llc}}{(\code{boolean(1)}) \cr
 Whether to use the complete log-likelihood to fit the model.
 The default is \code{TRUE}.}
 }
@@ -131,16 +131,16 @@ Generate the posterior probability given estimated coefficients and data.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{theta}}{\code{matrix(1)} \cr
+\item{\code{theta}}{(\code{matrix()}) \cr
 The estimated coefficients matrix.}
 
-\item{\code{pi_vector}}{\code{numeric(1)} \cr
+\item{\code{pi_vector}}{(\code{numeric()}) \cr
 The prior probabilities of being in each class.}
 
-\item{\code{Y}}{\code{matrix(1)} \cr
+\item{\code{Y}}{(\code{matrix()}) \cr
 The dependent variable.}
 
-\item{\code{X}}{\code{matrix(1)} \cr
+\item{\code{X}}{(\code{matrix()}) \cr
 The independent variables.}
 }
 \if{html}{\out{</div>}}
@@ -158,7 +158,7 @@ Generate the gradiant function given the log-likelihood function.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{ll}}{\verb{function(1)} \cr
+\item{\code{ll}}{(\verb{function(1)}) \cr
 The log-likelihood function.}
 }
 \if{html}{\out{</div>}}
@@ -177,10 +177,10 @@ generate a set of \code{Family} objects.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{family}}{\code{character(1)} \cr
+\item{\code{family}}{(\code{character(1)}) \cr
 The family variable.}
 
-\item{\code{latent}}{\code{integer(1)} \cr
+\item{\code{latent}}{(\code{integer(1)}) \cr
 The latent class variable.}
 }
 \if{html}{\out{</div>}}

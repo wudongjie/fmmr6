@@ -43,19 +43,19 @@ Create a new instance of this \link{R6} \link[R6:R6Class]{R6::R6Class} class.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{Y}}{\code{matrix(1)} \cr
+\item{\code{Y}}{(\code{matrix()}) \cr
 The dependent variable.}
 
-\item{\code{X}}{\code{matrix(1)} \cr
+\item{\code{X}}{(\code{matrix()}) \cr
 The independent variables.}
 
-\item{\code{family}}{\code{formula(1)} \cr
-The distribution family to be used in the maximum likehood estimation.}
+\item{\code{family}}{(\code{character(1)}) \cr
+The distribution family to be used in the maximum likelihood estimation.}
 
-\item{\code{method}}{\code{character(1)} \cr
+\item{\code{method}}{(\code{character(1)}) \cr
 The optimization method used in the MLE. The default is \code{L-BFGS-B}.}
 
-\item{\code{start}}{\code{matrix(1)} \cr
+\item{\code{start}}{(\code{matrix()}) \cr
 Specify the start value for the MLE. The default is \code{NULL}.}
 }
 \if{html}{\out{</div>}}
@@ -77,7 +77,7 @@ generate a \code{Family} objects.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{family}}{\code{character(1)} \cr
+\item{\code{family}}{(\code{character(1)}) \cr
 The family variable.}
 }
 \if{html}{\out{</div>}}
@@ -95,7 +95,7 @@ Generate the likelihood function given the density function.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{density_func}}{\verb{function(1)} \cr
+\item{\code{density_func}}{(\verb{function(1)}) \cr
 The density function.}
 }
 \if{html}{\out{</div>}}
@@ -113,11 +113,14 @@ Fit the MLE.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{latent}}{\code{integer(1)} \cr
+\item{\code{latent}}{(\code{integer(1)}) \cr
 Latent class variable. Default is 1.}
 
-\item{\code{algo}}{\code{character(1)} \cr
+\item{\code{algo}}{(\code{character(1)}) \cr
 The algorithm used. The default is \code{mle}.}
+
+\item{\code{...}}{(\code{list()}) \cr
+Other related parameters.}
 }
 \if{html}{\out{</div>}}
 }

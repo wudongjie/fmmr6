@@ -39,9 +39,9 @@ FamilyMultiNomial <- R6Class("FamilyMultiNomial",
                          
                          #' @description 
                          #' Generate the start value
-                         #' @param Y `matrix(1)` \cr
+                         #' @param Y (`matrix()`) \cr
                          #' A matrix with 1 column contains the dependent variable.
-                         #' @param X `matrix(1)` \cr
+                         #' @param X (`matrix()`) \cr
                          #' A matrix with m column contains m independent variables.
                          gen_start = function(Y,X) {
                            if (is.vector(Y)) {stop("Y must be a matrix")}
@@ -51,9 +51,9 @@ FamilyMultiNomial <- R6Class("FamilyMultiNomial",
                          
                          #' @description 
                          #' Generate the constraint
-                         #' @param Y `matrix(1)` \cr
+                         #' @param Y (`matrix()`) \cr
                          #' A matrix with 1 column contains the dependent variable.
-                         #' @param X `matrix(1)` \cr
+                         #' @param X (`matrix()`) \cr
                          #' A matrix with m column contains m independent variables.
                          gen_constraint = function(Y, X) {
                            if (is.vector(Y)) {stop("Y must be a matrix")}

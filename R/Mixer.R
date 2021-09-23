@@ -18,14 +18,14 @@ Mixer <- R6Class("Mixer",
                public = list(
                  #' @description 
                  #' Create a new instance of this [R6] [R6::R6Class] class.
-                 #' @param family `formula(1)` \cr
+                 #' @param family (`character(1)`) \cr
                  #' The family/families of the mixture model to fit in the fmglm.
                  #' The distribution family can be either a string like 
                  #' "gaussian" or a vector like `c("gaussian", "poisson")`.
                  #' The default value is `gaussian`.
-                 #' @param latent `numeric(1)` \cr
+                 #' @param latent (`integer(1)`) \cr
                  #' The number of latent classes. The default is 2.
-                 #' @param use_llc `boolean(1)` \cr
+                 #' @param use_llc (`boolean(1)`) \cr
                  #' Whether to use the complete log-likelihood to fit the model.
                  #' The default is `TRUE`.
                  initialize = function(family="gaussian", latent=2, use_llc=TRUE){
@@ -60,7 +60,7 @@ Mixer <- R6Class("Mixer",
                  },
                  #' @description 
                  #' The function to generate the mixed log-likelihood.
-                 #' @param use_llc `boolean(1)` \cr
+                 #' @param use_llc (`boolean(1)`) \cr
                  #' Whether to use the complete log-likelihood to fit the model.
                  #' The default is `TRUE`.
                  mix_ll = function(use_llc=TRUE){
@@ -94,13 +94,13 @@ Mixer <- R6Class("Mixer",
                  },
                  #' @description 
                  #' Generate the posterior probability given estimated coefficients and data.
-                 #' @param theta `matrix(1)` \cr
+                 #' @param theta (`matrix()`) \cr
                  #' The estimated coefficients matrix.
-                 #' @param pi_vector `numeric(1)` \cr
+                 #' @param pi_vector (`numeric()`) \cr
                  #' The prior probabilities of being in each class.
-                 #' @param Y `matrix(1)` \cr
+                 #' @param Y (`matrix()`) \cr
                  #' The dependent variable.
-                 #' @param X `matrix(1)` \cr
+                 #' @param X (`matrix()`) \cr
                  #' The independent variables.
                  post_pr = function(theta, pi_vector, Y, X){
                    latent <- private$latent
@@ -122,7 +122,7 @@ Mixer <- R6Class("Mixer",
                  },
                  #' @description 
                  #' Generate the gradiant function given the log-likelihood function.
-                 #' @param ll `function(1)` \cr
+                 #' @param ll (`function(1)`) \cr
                  #' The log-likelihood function.
                  gen_gr = function(ll){                                        
                    gr <- function(theta) {
@@ -134,9 +134,9 @@ Mixer <- R6Class("Mixer",
                  #' @description 
                  #' Given the `family` variable and number of classes,
                  #' generate a set of `Family` objects.
-                 #' @param family `character(1)` \cr
+                 #' @param family (`character(1)`) \cr
                  #' The family variable.
-                 #' @param latent `integer(1)` \cr
+                 #' @param latent (`integer(1)`) \cr
                  #' The latent class variable.
                  #' @examples 
                  #' Mixer$new()$set_family("gaussian", 2)

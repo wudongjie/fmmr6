@@ -45,22 +45,22 @@ Create a new instance of this \link{R6} \link[R6:R6Class]{R6::R6Class} class.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{mixer}}{\code{Mixer(1)} \cr
+\item{\code{mixer}}{(\code{Mixer(1)}) \cr
 A mixer object contains the mixed density function of the model.}
 
-\item{\code{Y}}{\code{matrix(1)} \cr
+\item{\code{Y}}{(\code{matrix()}) \cr
 A matrix with 1 or k columns contains the dependent variable/variables.}
 
-\item{\code{X}}{\code{matrix(1)} \cr
+\item{\code{X}}{(\code{matrix()}) \cr
 A matrix with m column contains m independent variables.}
 
-\item{\code{start}}{\code{matrix(1)} \cr
+\item{\code{start}}{(\code{matrix()}) \cr
 The matrix of start values for the EM algorithm.}
 
-\item{\code{constraint}}{\code{matrix(1)} \cr
+\item{\code{constraint}}{(\code{matrix()}) \cr
 The matrix of constraint values for the EM algorithm}
 
-\item{\code{glm_fit}}{\code{boolean(1)} \cr
+\item{\code{glm_fit}}{(\code{boolean(1)}) \cr
 Whether use the \code{glm.fit()}, \code{ols.wfit()} or \code{nnet()} to fit the model.}
 }
 \if{html}{\out{</div>}}
@@ -81,24 +81,24 @@ Fit the model using the EM algorithm
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{algo}}{\code{character(1)} \cr
+\item{\code{algo}}{(\code{character(1)}) \cr
 Specify the type of EM algorithm to use. Can choose \code{em} stands for the
 conventional EM algorithm, \code{cem} stands for the classification EM algorithm,
 and \code{sem} stands for the stochastic EM algorithm.
 The default algorithm is \code{em}.}
 
-\item{\code{max_iter}}{\code{numeric(1)} \cr
+\item{\code{max_iter}}{(\code{numeric(1)}) \cr
 Specify the maximum number of iterations for the E-step-M-step loop.
 The default number is 500.}
 
-\item{\code{start}}{\code{character(1)} \cr
+\item{\code{start}}{(\code{character(1)}) \cr
 Specify the starting method of the EM algorithm.
 Can either start from \code{kmeans} or \code{random}.
 \code{kmeans} use the K-mean methods to put samples into latent classes.
 \code{random} randomly assigns samples into latent classes.
 The default method is \code{kmeans}.}
 
-\item{\code{rep}}{\code{numeric(1)} \cr
+\item{\code{rep}}{(\code{numeric(1)}) \cr
 Specify the number of reps EM-algorithm runs.
 This parameter is designed for preventing the local maximum.
 Each rep, the EM_algorithm generates a start.
@@ -123,10 +123,10 @@ the indicator variable.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{theta_update}}{\code{matrix(1)} \cr
+\item{\code{theta_update}}{(\code{matrix()}) \cr
 Updated coefficients}
 
-\item{\code{pi_vector}}{\code{matrix(1)} \cr
+\item{\code{pi_vector}}{(\code{matrix()}) \cr
 The matrix with the diagonal values representing the prior probability \verb{\\pi}.}
 }
 \if{html}{\out{</div>}}
@@ -148,7 +148,7 @@ each individual to a class. The assignment based on which probability is the lar
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{hidden}}{\code{matrix(1)} \cr
+\item{\code{hidden}}{(\code{matrix()}) \cr
 The matrix of the posterior probability}
 }
 \if{html}{\out{</div>}}
@@ -167,7 +167,7 @@ each individual to a class. The assignment is randomly sampled based on the post
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{hidden}}{\code{matrix(1)} \cr
+\item{\code{hidden}}{(\code{matrix()}) \cr
 The matrix of the posterior probability}
 }
 \if{html}{\out{</div>}}
@@ -188,16 +188,16 @@ function and update the parameter vectors theta.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{likelihood_func}}{\verb{function(1)} \cr
+\item{\code{likelihood_func}}{(\verb{function(1)}) \cr
 The likelihood function to maximize.}
 
-\item{\code{hidden}}{\code{matrix(1)} \cr
+\item{\code{hidden}}{(\code{matrix()}) \cr
 The matrix of the posterior probability.}
 
-\item{\code{theta}}{\code{matrix(1)} \cr
+\item{\code{theta}}{(\code{matrix()}) \cr
 The matrix of the coefficients to fit.}
 
-\item{\code{glm_fit}}{\code{boolean(1)} \cr
+\item{\code{glm_fit}}{(\code{boolean(1)}) \cr
 Whether use the \code{glm.fit()}, \code{ols.wfit()} or \code{nnet()} to fit the model.}
 }
 \if{html}{\out{</div>}}

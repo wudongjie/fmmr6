@@ -15,15 +15,15 @@ mle <- R6Class("mle",
     public = list(
         #' @description
         #' Create a new instance of this [R6] [R6::R6Class] class.
-        #' @param Y `matrix(1)` \cr
+        #' @param Y (`matrix()`) \cr
         #' The dependent variable.
-        #' @param X `matrix(1)` \cr
+        #' @param X (`matrix()`) \cr
         #' The independent variables.
-        #' @param family `formula(1)` \cr
-        #' The distribution family to be used in the maximum likehood estimation.
-        #' @param method `character(1)` \cr
+        #' @param family (`character(1)`) \cr
+        #' The distribution family to be used in the maximum likelihood estimation.
+        #' @param method (`character(1)`) \cr
         #' The optimization method used in the MLE. The default is `L-BFGS-B`.
-        #' @param start `matrix(1)` \cr
+        #' @param start (`matrix()`) \cr
         #' Specify the start value for the MLE. The default is `NULL`.
         #' @return Return a R6 object of class mle
         initialize = function(Y, X, family, method="L-BFGS-B", start=NULL){
@@ -40,7 +40,7 @@ mle <- R6Class("mle",
         #' @description 
         #' Given the `family` variable and number of classes,
         #' generate a `Family` objects.
-        #' @param family `character(1)` \cr
+        #' @param family (`character(1)`) \cr
         #' The family variable.
         gen_family = function(family) {
           if (family == "gaussian") { return(FamilyNormal$new())} 
@@ -53,7 +53,7 @@ mle <- R6Class("mle",
         },
         #' @description 
         #' Generate the likelihood function given the density function.
-        #' @param density_func `function(1)` \cr
+        #' @param density_func (`function(1)`) \cr
         #' The density function.
         gen_ll = function(density_func) {
           ll = function(theta, Y, X) {
@@ -68,10 +68,12 @@ mle <- R6Class("mle",
         },
         #' @description 
         #' Fit the MLE.
-        #' @param latent `integer(1)` \cr
+        #' @param latent (`integer(1)`) \cr
         #' Latent class variable. Default is 1.
-        #' @param algo `character(1)` \cr
-        #' The algorithm used. The default is `mle`. 
+        #' @param algo (`character(1)`) \cr
+        #' The algorithm used. The default is `mle`.
+        #' @param ... (`list()`) \cr
+        #' Other related parameters. 
         fit = function(latent=1, algo="mle", ...) {
             latent <- as.integer(latent)
             if ((is.na(latent)) | latent==0) {

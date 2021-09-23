@@ -54,10 +54,10 @@ Generate the density function
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{Y}}{\code{matrix(1)} \cr
+\item{\code{Y}}{(\code{matrix()}) \cr
 A matrix with 1 column contains the dependent variable.}
 
-\item{\code{X}}{\code{matrix(1)} \cr
+\item{\code{X}}{(\code{matrix()}) \cr
 A matrix with m column contains m independent variables.}
 }
 \if{html}{\out{</div>}}
@@ -78,10 +78,10 @@ Generate the start value
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{Y}}{\code{matrix(1)} \cr
+\item{\code{Y}}{(\code{matrix()}) \cr
 A matrix with 1 column contains the dependent variable.}
 
-\item{\code{X}}{\code{matrix(1)} \cr
+\item{\code{X}}{(\code{matrix()}) \cr
 A matrix with m column contains m independent variables.}
 }
 \if{html}{\out{</div>}}
@@ -99,10 +99,10 @@ Generate the constraint
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{Y}}{\code{matrix(1)} \cr
+\item{\code{Y}}{(\code{matrix()}) \cr
 A matrix with 1 column contains the dependent variable.}
 
-\item{\code{X}}{\code{matrix(1)} \cr
+\item{\code{X}}{(\code{matrix()}) \cr
 A matrix with m column contains m independent variables.}
 }
 \if{html}{\out{</div>}}

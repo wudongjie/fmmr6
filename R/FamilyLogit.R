@@ -21,9 +21,9 @@ FamilyLogit <- R6Class("FamilyLogit",
                           
                           #' @description 
                           #' Generate the density function
-                          #' @param Y `matrix(1)` \cr
+                          #' @param Y (`matrix()`) \cr
                           #' A matrix with 1 column contains the dependent variable.
-                          #' @param X `matrix(1)` \cr
+                          #' @param X (`matrix()`) \cr
                           #' A matrix with m column contains m independent variables.
                           #' @return this function returns the density function of the logistic regression.
                           gen_density = function() {
@@ -35,9 +35,9 @@ FamilyLogit <- R6Class("FamilyLogit",
                           
                           #' @description 
                           #' Generate the start value
-                          #' @param Y `matrix(1)` \cr
+                          #' @param Y (`matrix()`) \cr
                           #' A matrix with 1 column contains the dependent variable.
-                          #' @param X `matrix(1)` \cr
+                          #' @param X (`matrix()`) \cr
                           #' A matrix with m column contains m independent variables.
                           gen_start = function(Y, X) {
                             if (is.vector(X)) {return(matrix(c(1)))}
@@ -46,9 +46,9 @@ FamilyLogit <- R6Class("FamilyLogit",
                           
                           #' @description 
                           #' Generate the constraint
-                          #' @param Y `matrix(1)` \cr
+                          #' @param Y (`matrix()`) \cr
                           #' A matrix with 1 column contains the dependent variable.
-                          #' @param X `matrix(1)` \cr
+                          #' @param X (`matrix()`) \cr
                           #' A matrix with m column contains m independent variables.
                           gen_constraint = function(Y, X) {
                             if (is.vector(X)) {

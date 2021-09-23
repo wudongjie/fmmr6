@@ -9,6 +9,91 @@ Returns R6 object of class fmglm.
 \description{
 A finite mixture of generalized linear model (GLM)
 }
+\section{Introduction of \code{fmglm} class}{
+
+The \code{fmglm} class is designed to fit the finite mixture of generalized linear
+models including the multinomial regression models.
+It contains three major methods:
+\itemize{
+\item \verb{$new()} creates a \code{fmglm} object given \code{data} and \code{formula}
+\item \verb{$fit()} fits the \code{fmglm} model. The algorithm used to fit and
+the starting method can also be specified in the method. In addition,
+this method returns a result list containing coefficients, loglikelihood value,
+and information criterion such as AIC and BIC.
+\item \verb{$summarize()} generates the table output of the results including
+the standard errors and p-values.
+}
+}
+
+\section{The Normal Likelihood Function Vs. The Complete-Data Likelihood Function}{
+
+The Finite Mixture Model (FMM) with \eqn{K} components can be written in the following form:
+\deqn{f(y|x, \phi) = \sum_{k=1}^K{\pi_k f_k(y|x, \theta_k)}}
+
+Based on the above equation, the log-likelihood function is:
+\deqn{\log(L) = \sum_{i=1}^N \log{f(y_i|x_i, \phi)} = \sum_{i=1}^N \log {\sum_{k=1}^K{\pi_k f_k(y_i|x_i, \theta_k)}}}
+
+The log-likelihood function can be maximized separately for each component in the M-step,
+given the posterior probabilities as weights:
+\deqn{\max_{\theta_k} \sum_{i=1}^N \hat{p_{ik}} \log f_k(y_i|x_i, \theta_k)}
+
+where \eqn{p_{ik}} is the posterior probabilty estimated in the E-step.
+This approach is used in other packages, such as \CRANpkg{flexmix}.
+
+Similar to \CRANpkg{flexmix}, we use \code{glm.fit()} and \code{lm.wfit()}, to fit the log-likelihood function by components.
+To use it, set \code{glm_fit} to \code{TRUE} and \code{use_llc} to \code{FALSE}.
+
+Alternative, FMM can be viewed as a model with incomplete data where the variable to determine individual's class is missing.
+The imputed variable \eqn{z_ik = 1} or {0} captures the classification of each sample.
+Therefore, the complete-data log-likelihood is:
+\deqn{\log L_c = \sum_{k=1}^K \sum_{i=1}^N z_ik \{ \log{\pi} + \log{f_k(y_i|x_i, \theta_k)} \} }
+
+In this package, we use \code{optim} with the L-BFGS-B algorithm to maximize the complete-data log-likelihood.
+And this method is the default method to fit FMM.
+}
+
+\section{Alternative Algorithm to EM-algorithm}{
+
+
+In addition to the normal EM-algorithm, \verb{$fit()} can also choose two extended algorithms of the EM-algorithm.
+\itemize{
+\item The Classification EM (\code{cem}) assigns each sample to a component based on the maximum value of its posterior probabilities.
+\item The Stocastic EM (\code{sem}) randomly assigns each sample to a component based on its posterior probabilities.
+}
+}
+
+\section{Use \code{fmglm} to Fit Finite Mixture of Generalized Linear Models}{
+
+The main practice of \code{fmglm} is to fit finite mixture of generalized linear models
+such as linear regressions with Gaussian distributions or Poisson distribution.
+To fit a linear regression with Gaussian distribution, run the code similar to the following:\preformatted{model1 <- fmglm$new(formula1, data, family="gaussian", latent=2)
+result <- model1$fit()
+output <- model1$summarize()
+}
+
+Benefit from the chain feature of R6, the code can be written in one line like the following:\preformatted{result <-fmglm$new(formula1, data, family="gaussian", latent=2)$fit()$summarize()
+}
+}
+
+\section{Use \code{fmglm} to Fit Finite Mixture of Multinomial Regression Models}{
+
+
+\code{fmglm} can fit finite mixture of multinomial regression models as well.
+In general the code is similar to fitting the mixture of generalized linear models.\preformatted{model_mn <- fmglm$new(formula, data, family="multinom",
+                      latent=2, method="em", glm_fit=F, use_llc=T)
+}
+
+The difference is that one should prepare the dependent variable as a \code{factor} variable.
+In addition, the parameter \code{mn_base} is available in the constructor for identifying
+the base group of the dependent variable. The default value is \code{1}.
+
+Same as the fitting the mixture of GLM, one can also use the normal log-likelihood and
+set the \code{glm_fit} to \code{TRUE}. Instead of using \code{glm.fit()}, \code{nnet::nnet()} is used to
+fit the mixture of multinomial regression model. The following code is an example:\preformatted{model_mn <- fmglm$new(formula, data, family="multinom",
+                      latent=2, method="em", glm_fit=T, use_llc=F)
+}
+}
+
 \author{
 Dongjie Wu
 }
@@ -53,34 +138,34 @@ Create a new instance of this \link{R6} \link[R6:R6Class]{R6::R6Class} class.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{formula}}{\code{formula(1)} \cr
+\item{\code{formula}}{(\code{formula(1)}) \cr
 The formula/expression of the model to fit in the fmglm}
 
-\item{\code{data}}{\code{data(1)} \cr
+\item{\code{data}}{(\code{data.frame()}) \cr
 The Data used in the fmglm}
 
-\item{\code{family}}{\code{character(1)} \cr
+\item{\code{family}}{(\code{character(1)|character()}) \cr
 The distribution family which can be either a string like "gaussian"
 or a vector like \code{c("gaussian", "poisson")}}
 
-\item{\code{latent}}{\code{numeric(1)} \cr
+\item{\code{latent}}{(\code{integer(1)}) \cr
 The number of latent classes}
 
-\item{\code{method}}{\code{character(1)} \cr
+\item{\code{method}}{(\code{character(1)}) \cr
 The estimation method to fit the fmglm}
 
-\item{\code{start}}{\code{matrix(1)} \cr
+\item{\code{start}}{(\code{matrix()}) \cr
 The starting values for the fmglm}
 
-\item{\code{glm_fit}}{\code{Boolean(1)} \cr
+\item{\code{glm_fit}}{(\code{Boolean(1)}) \cr
 Whether use the \code{glm.fit()}, \code{ols.wfit()} or \code{nnet()} to fit the model.
 The default is \code{FALSE}.}
 
-\item{\code{use_llc}}{\code{Boolean(1)} \cr
+\item{\code{use_llc}}{(\code{Boolean(1)}) \cr
 Whether to use the complete log-likelihood to fit the model.
 The default is \code{TRUE}.}
 
-\item{\code{mn_base}}{\code{integer(1)} \cr
+\item{\code{mn_base}}{(\code{integer(1)}) \cr
 Determine which column of the multinomial variable is set to be the base group.}
 }
 \if{html}{\out{</div>}}
@@ -101,25 +186,25 @@ Fit the fmglm model
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{algo}}{\code{character(1)} \cr
+\item{\code{algo}}{(\code{character(1)}) \cr
 The algorithm used in fitting the fmglm model.
 The default algorithm is \code{em} standing for the normal EM algorithm.
 One can choose from \code{c("em", "cem", "sem")}.
 \code{cem} is the classification EM algorithm.
 \code{sem} is the stochastic EM algorithm.}
 
-\item{\code{max_iter}}{\code{numeric(1)} \cr
+\item{\code{max_iter}}{(\code{integer(1)}) \cr
 Specify the maximum number of iterations for the E-step-M-step loop.
 The default number is 500.}
 
-\item{\code{start}}{\code{character(1)} \cr
+\item{\code{start}}{(\code{character(1)}) \cr
 Specify the starting method of the EM algorithm.
 Can either start from \code{kmeans} or \code{random}.
 \code{kmeans} use the K-mean methods to put samples into latent classes.
 \code{random} randomly assigns samples into latent classes.
 The default method is \code{kmeans}.}
 
-\item{\code{rep}}{\code{numeric(1)} \cr
+\item{\code{rep}}{(\code{integer(1)}) \cr
 Specify the number of reps EM-algorithm runs.
 This parameter is designed for preventing the local maximum.
 Each rep, the EM_algorithm generates a start.
@@ -142,7 +227,7 @@ Generate a summary for the result.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{digits}}{\code{integer(1)} \cr
+\item{\code{digits}}{(\code{integer(1)}) \cr
 Determine how many digits presented in the output.}
 }
 \if{html}{\out{</div>}}
