@@ -1,35 +1,42 @@
-# test_that("multiplication works", {
-#   data("NPreg")
-#   latent <- 2
-#   NPreg$x2 <- (NPreg$x)^2
-#   formula <- yn~x+x2
-#   print(lm(formula, NPreg))
-#   # the model using the complete loglik and buildin optim
-#   model1 <- fmglm$new(formula, NPreg, family="gaussian", latent=2,
-#             method="em", glm_fit=F, use_llc=T)
-#   # the model using the normal loglik and glm.fit
-#   model2 <- fmglm$new(formula, NPreg, family="gaussian", latent=2,
-#                       method="em", glm_fit=T, use_llc=F)
-#   X <- matrix(c(NPreg$x,NPreg$x2),ncol = 2)
-#   result1 <- model1$fit(algo="em")
-#   result2 <- model2$fit(algo="em")
-#   print(result1)
-#   print(result2)
-#   # test the cem algorithm
-#   result1c <- model1$fit(algo="cem")
-#   result2c <- model2$fit(algo="cem")
-#   # test the sem algorithm
-#   browser()
-#   result1s <- model1$fit(algo="sem", max_iter=100)
-#   result2s <- model2$fit(algo="sem", max_iter=100)
-# 
-#   expect_equal(result1$par, result2$par, tolerance = 0.001)
-#   expect_equal(result1s$par, result2s$par, tolerance = 0.001)
-#   expect_equal(result1c$par, result2c$par, tolerance = 0.001)
-# 
-# 
-#   print(model1$summarize())
-# })
+test_that("multiplication works", {
+  data("NPreg")
+  latent <- 2
+  NPreg$x2 <- (NPreg$x)^2
+  formula <- yn~x+x2
+  print(coef(lm(formula, NPreg)))
+  browser()
+  model_ols <- fmglm$new(formula, NPreg, family = "gaussian", method="mle", latent=1)
+  print(model_ols$fit())
+  
+  model_ols2 <- fmglm$new(formula, NPreg, family = "gaussian", method="mle", latent=1, glm_fit=T)
+  print(model_ols2$fit())
+  
+  # the model using the complete loglik and buildin optim
+  # model1 <- fmglm$new(formula, NPreg, family="gaussian", latent=2,
+  #           method="em", glm_fit=F, use_llc=T)
+  # # the model using the normal loglik and glm.fit
+  # model2 <- fmglm$new(formula, NPreg, family="gaussian", latent=2,
+  #                     method="em", glm_fit=T, use_llc=F)
+  # X <- matrix(c(NPreg$x,NPreg$x2),ncol = 2)
+  # result1 <- model1$fit(algo="em")
+  # result2 <- model2$fit(algo="em")
+  # print(result1)
+  # print(result2)
+  # # test the cem algorithm
+  # result1c <- model1$fit(algo="cem")
+  # result2c <- model2$fit(algo="cem")
+  # # test the sem algorithm
+  # browser()
+  # result1s <- model1$fit(algo="sem", max_iter=100)
+  # result2s <- model2$fit(algo="sem", max_iter=100)
+  # 
+  # expect_equal(result1$par, result2$par, tolerance = 0.001)
+  # expect_equal(result1s$par, result2s$par, tolerance = 0.001)
+  # expect_equal(result1c$par, result2c$par, tolerance = 0.001)
+
+
+  print(model1$summarize())
+})
 
 test_that("test poisson", {
   data("NPreg")

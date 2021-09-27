@@ -64,6 +64,14 @@ Mixer <- R6Class("Mixer",
                  #' Whether to use the complete log-likelihood to fit the model.
                  #' The default is `TRUE`.
                  mix_ll = function(use_llc=TRUE){
+                   ll = function(theta, Y, X) {
+                     if (is.matrix(Y)|is.data.frame(Y)){
+                       theta <- matrix(theta, ncol=ncol(Y))
+                     } else {
+                       theta <- matrix(theta, ncol=1)
+                     }
+                     return(-sum(private$family[[1]]$gen_density()(theta, Y, X)))
+                   }
                    mll <- function(theta, Y, X, d) {
                      latent <- private$latent
                      if (is.matrix(Y)|is.data.frame(Y)){
@@ -90,7 +98,13 @@ Mixer <- R6Class("Mixer",
                      l <- sum(l)
                      return(-l)
                    }
-                   return(mll)
+                   if (private$latent == 1) {
+                     return(ll)
+                   } else if (private$latent > 1) {
+                     return(mll)
+                   } else {
+                     stop("Latent class should be an integer larger than 0")
+                   }
                  },
                  #' @description 
                  #' Generate the posterior probability given estimated coefficients and data.
@@ -144,9 +158,6 @@ Mixer <- R6Class("Mixer",
                  #' Mixer$new()$set_family(c("gaussian", "poisson"), 2)
                  #' # Return `c(FamilyNormal$new(), FamilyPoisson$new())`. 
                  set_family = function(family, latent){
-                   if ((length(family) == 1) & (latent==1)) {
-                     stop("Only one latent class!")
-                   }
                    if ((length(family) == 1) & (latent>1)) {
                      family <- rep(family,latent)
                    }
@@ -189,11 +200,7 @@ Mixer <- R6Class("Mixer",
                  #' @description 
                  #' Generate the constraint of the parameters.
                  gen_constraint = function(){
-                   latent = private$latent
-                   if (latent==1) {
-                     constr = private$family$gen_constraint
-                     return(constr)
-                   } else {
+                     latent = private$latent
                      constr = function(Y, X){
                        mix_l = c()
                        mix_h = c()
@@ -209,7 +216,6 @@ Mixer <- R6Class("Mixer",
                          )
                      }
                      return(constr)
-                   }
                    }
                ),
                private=list(

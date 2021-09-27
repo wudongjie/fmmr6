@@ -71,14 +71,14 @@ fmglm <- R6Class("fmglm",
               private$Y <-  model.frame(formula, data)[,1]
             }
             private$X <- model.matrix(formula, data)
-            if (latent>1) {
-              private$mixer <- Mixer$new(family=family, latent=latent, use_llc=use_llc)
-            }
+            private$mixer <- Mixer$new(family=family, latent=latent, use_llc=use_llc)
 
             # check the start value
             if (method == "mle") {
-                private$method <- mle$new(private$Y, private$X, family, 
-                                          start=private$start)
+                private$method <- mle$new(private$mixer, 
+                                          private$Y,
+                                          private$X, 
+                                          start=private$start, glm_fit=private$glm_fit)
             } 
             if (method == "em") {
               private$method <- em$new(private$mixer, 
