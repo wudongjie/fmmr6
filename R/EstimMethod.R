@@ -13,6 +13,9 @@
 EstimMethod <- R6Class("EstimMethod",
                           inherit = AbstractMethod,
                           public = list(
+                            data_model = NULL,
+                            latent = 1,
+                            optim_method = NULL,
                             #' @description
                             #' Create a new instance of this [R6] [R6::R6Class] class.
                             #' @param mixer (`Mixer(1)`) \cr
@@ -28,37 +31,41 @@ EstimMethod <- R6Class("EstimMethod",
                             #' @param glm_fit (`boolean(1)`) \cr
                             #' Whether use the `glm.fit()`, `ols.wfit()` or `nnet()` to fit the model.
                             #' @return Return a R6 object of class em.
-                            initialize = function(mixer, Y, X, start=NULL, constraint=NULL, glm_fit=F){
-                              private$X <- X
-                              private$Y <- Y
-                              private$latent <- mixer$get_latent()
-                              private$mixer <- mixer
-                              private$glm_fit <- glm_fit
+                            initialize = function(mixer, data_model, start=NULL, constraint=NULL, optim_method="base"){
+                              self$data_model <- data_model
+                              self$latent <- mixer$latent
+                              self$optim_method <- optim_method
+                              private$.mixer <- mixer
+                              private$.likelihood_func <- mixer$ll
                               if (!is.null(start)) {
-                                private$start <- start
+                                private$.start <- start
                               } else {
-                                private$start <- private$mixer$gen_start()(private$Y, private$X)
+                                private$.start <- private$.mixer$gen_start()(self$data_model$Y, self$data_model$X)
                               }
                               if (!is.null(constraint)) {
-                                private$constraint <- constraint
+                                private$.constraint <- constraint
                               } else {
-                                private$constraint <- private$mixer$gen_constraint()(private$Y, private$X)
+                                private$.constraint <- private$.mixer$gen_constraint()(self$data_model$Y, self$data_model$X)
+                              }
+                            },
+                            partial = function(f, ...) {
+                              l <- list(...)
+                              function(...) {
+                                do.call(f, c(l, list(...)))
                               }
                             }),
                             private = list(
-                              Y = NULL,
-                              X = NULL,
-                              latent = 1,
-                              constraint = NULL,
-                              likelihood_func = NULL,
-                              start = NULL,
-                              mixer = NULL,
-                              glm_fit = FALSE
-                              # dist_list = list(
-                              #   "glm" = OptimGLM$new(),
-                              #   "lm" = OptimLM$new(),
-                              #   "nnet" = OptimNNet$new(),
-                              #   "bfgs" = OptimBFGS$new()
-                              # )
+                              .constraint = NULL,
+                              .likelihood_func = NULL,
+                              .start = NULL,
+                              .mixer = NULL,
+                              dist_list = list(
+                                "glm" = quote(OptimGLM),
+                                "lm" = quote(OptimLM),
+                                "nnet" = quote(OptimNNet),
+                                "base" = quote(OptimBase),
+                                "gnm" = quote(OptimGNM),
+                                "mle" = quote(OptimMLE)
+                              )
                             )
                           )

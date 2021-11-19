@@ -12,10 +12,10 @@ test_that("test mix ll", {
   d <- cbind(d1,d2)
   formula <- y ~ x1 + x2
   X <- matrix(data = c(x1,x2), ncol=2)
-  #browser()
   data <- data.frame(y=y,x1=x1,x2=x2)
   mix1 <- Mixer$new(family="gaussian", latent=2)
-  ll <- mix1$get_ll()
+  ll <- mix1$ll
+  browser()
   ll_expect <- d[,1]*(log(0.3) + dnorm(y, mean=5*x1+3*x2, sd=1, log=T))
   ll_expect <- ll_expect + d[,2]*(log(0.7) + dnorm(y, mean=2*x1+4*x2, sd=1, log=T))
   ll_expect <- sum(-ll_expect)
@@ -70,9 +70,10 @@ test_that("test set family", {
   family2 <- c("gaussian", "poisson")
   latent1 <- 1
   latent2 <- 2
-  expect_error(mix1$set_family(family1, latent1), "Only one latent class!")
-  k <-mix1$set_family(family1, latent2)
-  expect_equal(length(k),latent2)
+  k1 <- mix1$set_family(family1, latent1)
+  expect_equal(length(k1), latent1)
+  k2 <-mix1$set_family(family1, latent2)
+  expect_equal(length(k2),latent2)
 })
 
 
@@ -115,12 +116,13 @@ test_that("test mixture of multinomial", {
   y_d <- rbind(y_d1[1:30,], y_d2[31:100,])
   data <- data.frame(y=y_d,x1=x1,x2=x2)
   mix1 <- Mixer$new(family="multinom", latent=2)
-  ll <- mix1$get_ll()
+  ll <- mix1$ll
   d1 <- matrix(1, nrow=100, ncol=1)
   d1[31:100] <- 0
   d2 <- matrix(1, nrow=100, ncol=1)
   d2[1:30] <- 0
   d <- cbind(d1,d2)
+  browser()
   ll_actual <- ll(theta1, y_d, X, d)
   expect_lt(ll_actual,200)
 })

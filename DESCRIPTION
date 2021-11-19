@@ -13,7 +13,7 @@ LazyData: true
 Roxygen: list(markdown = TRUE, r6 = TRUE)
 RoxygenNote: 7.1.1
 Depends:
-  R6, optimx, numDeriv, flexmix, pracma, Rmixmod, fastDummies, nnet
+  R6, optimx, numDeriv, flexmix, pracma, Rmixmod, fastDummies, nnet, bbmle
 Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

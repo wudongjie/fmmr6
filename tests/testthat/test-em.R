@@ -8,8 +8,11 @@ test_that("test e-step", {
   Y[37:100] <- theta[5,1]*x1[37:100]+theta[6,1]*x2[37:100]
   X <- matrix(c(x1,x2),ncol = 2)
   latent <- 2
+  formula <- Y ~ 0 + x1 + x2
+  data <- data.frame(Y=Y, x1=x1, x2=x2)
+  dm1 <- DataModel$new(data, formula, family="gaussian")  
   mix1 <-  Mixer$new(family="gaussian", latent=2)
-  y_result <- em$new(mix1, Y, X)$estep(theta, pi_v)
+  y_result <- em$new(mix1, dm1)$estep(theta, pi_v)
   z <- vectorize_dummy(kmeans(cbind(Y,X), 2)$cluster)
   y_expect <- c(36, 64)
   expect_equal(colSums(y_result), y_expect, tolerance=1e-1)
@@ -28,11 +31,14 @@ test_that("test m-step", {
   Y[361:1000] <- theta[5,1]*x1[361:1000]+theta[6,1]*x2[361:1000]
   X <- matrix(c(x1,x2),ncol = 2)
   latent <- 2
+  formula <- Y ~ 0 + x1 + x2
+  data <- data.frame(Y=Y, x1=x1, x2=x2)
+  dm1 <- DataModel$new(data, formula, family="gaussian")  
   mix1 <- Mixer$new(family="gaussian", latent=2)
-  em1 <- em$new(mix1, Y, X)
+  em1 <- em$new(mix1, dm1)
   y_result <- em1$estep(theta, pi_v)
   ll <- mix1$mix_ll()
-  result <- em1$mstep(ll, y_result, theta)
+  result <- em1$mstep(y_result, theta)
   expect_equal(result$par, matrix(theta, ncol=1), tolerance = 0.1)
 })
 
@@ -49,12 +55,17 @@ test_that("test fit", {
   start2 <- c(1,1,1,1,1,1,1,1)
   pi_v <- c(0.5, 0.5)
   mix1 <- Mixer$new(family="gaussian", latent=2)
-  em1 <- em$new(mix1, Y, X, start=start1)
+  dm1 <- DataModel$new(NPreg, formula, family="gaussian")  
+  
+  em2 <- em$new(mix1, dm1, start=start1, optim_method="glm")
+  browser()
+  result2 <- em2$fit(algo="em")
+  em1 <- em$new(mix1, dm1, start=start1)
   result <- em1$fit(algo="em")
   mod2 <- flexmix::flexmix(yn~x+x2, data=NPreg, k=2) 
   result_mod2 <- rbind(parameters(mod2, component=1), 
                        parameters(mod2, component=2))
-  print(result$par)
-  print(result_mod2)
+
+  expect_equal(result$value, result2$value, tolerance = 0.1)
 })
 

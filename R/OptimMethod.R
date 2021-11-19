@@ -13,5 +13,9 @@
 OptimMethod <- R6Class("OptimMethod",
                        inherit = AbstractMethod,
                        public = list(
+                         initialize = function() {
+                         }
+                       ),
+                       private = list(
                        )
 )
