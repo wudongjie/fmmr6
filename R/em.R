@@ -174,7 +174,9 @@ em <- R6Class("em",
                  #' Whether use the `glm.fit()`, `ols.wfit()` or `nnet()` to fit the model.
                  mstep = function(hidden, theta, optim_method="base"){
                    npar <- self$latent + nrow(theta) * ncol(theta) - 1
-                   ll <- partial(private$.likelihood_func, d=hidden, Y=self$data_model$Y, X=self$data_model$X)
+                   ll <- partial(private$.likelihood_func, d=hidden, 
+                                 Y=self$data_model$Y, X=self$data_model$X,
+                                 latent=self$latent, family=private$.mixer$family_init, isLog=private$.use_llc)
                    gr <- gen_gr(ll)
                    pi_vector = colSums(hidden)/nrow(hidden)
                    sel_optim <- private$dist_list[[optim_method]]

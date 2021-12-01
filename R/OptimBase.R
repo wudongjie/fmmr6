@@ -21,7 +21,7 @@ OptimBase <- R6Class("OptimBase",
                         result <- suppressWarnings(optim(theta,
                                                          ll,
                                                          gr,
-                                                         method="CG",
+                                                         method="BFGS",
                                                          hessian=T))
      
                         # result <- suppressWarnings(lbfgs(ll,

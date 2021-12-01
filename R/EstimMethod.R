@@ -31,12 +31,14 @@ EstimMethod <- R6Class("EstimMethod",
                             #' @param glm_fit (`boolean(1)`) \cr
                             #' Whether use the `glm.fit()`, `ols.wfit()` or `nnet()` to fit the model.
                             #' @return Return a R6 object of class em.
-                            initialize = function(mixer, data_model, start=NULL, constraint=NULL, optim_method="base"){
+                            initialize = function(mixer, data_model, start=NULL, constraint=NULL, optim_method="base",use_llc=T){
                               self$data_model <- data_model
                               self$latent <- mixer$latent
                               self$optim_method <- optim_method
                               private$.mixer <- mixer
-                              private$.likelihood_func <- mixer$ll
+                              private$.use_llc <- use_llc
+                              #private$.likelihood_func <- mixer$ll
+                              private$.likelihood_func <- mix_ll
                               if (!is.null(start)) {
                                 private$.start <- start
                               } else {
@@ -59,6 +61,7 @@ EstimMethod <- R6Class("EstimMethod",
                               .likelihood_func = NULL,
                               .start = NULL,
                               .mixer = NULL,
+                              .use_llc = NULL,
                               dist_list = list(
                                 "glm" = quote(OptimGLM),
                                 "lm" = quote(OptimLM),

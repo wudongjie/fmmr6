@@ -14,12 +14,17 @@ test_that("test mix ll", {
   X <- matrix(data = c(x1,x2), ncol=2)
   data <- data.frame(y=y,x1=x1,x2=x2)
   mix1 <- Mixer$new(family="gaussian", latent=2)
+  mix2 <- Mixer$new(family="gaussian", latent=2, use_llc=F)
   ll <- mix1$ll
+  ll2 <- mix2$ll
   browser()
   ll_expect <- d[,1]*(log(0.3) + dnorm(y, mean=5*x1+3*x2, sd=1, log=T))
   ll_expect <- ll_expect + d[,2]*(log(0.7) + dnorm(y, mean=2*x1+4*x2, sd=1, log=T))
   ll_expect <- sum(-ll_expect)
   ll_actual <- ll(theta, y, X, d)
+  ll_expect2 <- 0.3*dnorm(y,mean=5*x1+3*x2,sd=1) + 0.7*dnorm(y,mean=2*x1+4*x2, sd=1)
+  ll_expect2 <- -sum(log(ll_expect2))
+  ll_actual2 <- ll2(theta,y, X, d)
   expect_equal(ll_actual, ll_expect)
 })
 

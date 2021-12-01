@@ -93,11 +93,11 @@ fmglm <- R6Class("fmglm",
             # check the start value
             if (method == "mle") {
                 self$method <- mle$new(private$.mixer, self$data_model,
-                                          start=private$start, optim_method=self$optim_method)
+                                          start=private$start, optim_method=self$optim_method, use_llc=use_llc)
             } 
             if (method == "em") {
               self$method <- em$new(private$.mixer, self$data_model,
-                                       start=self$start, optim_method=self$optim_method)
+                                       start=self$start, optim_method=self$optim_method, use_llc=use_llc)
             }
         },
         
