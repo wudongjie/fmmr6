@@ -16,6 +16,30 @@
 OptimBase <- R6Class("OptimBase",
                     inherit = OptimMethod,
                     public = list(
+                      #' @description 
+                      #' Run the optimization for the model.
+                      #' @param data_model (`DataModel()`) \cr
+                      #' The DataModel object contains data used in the fmmr6.
+                      #' @param theta (`numeric()`) \cr
+                      #' The coefficients to estimates.
+                      #' @param ll (`function()`) \cr
+                      #' The loglikelihood function.
+                      #' @param gr (`function()`) \cr
+                      #' The gradient function.
+                      #' @param hidden (`matrix()`) \cr
+                      #' The matrix of the posterior probability.
+                      #' @param pi_vector (`numeric()`) \cr
+                      #' A vector of the prior probability `pi`.
+                      #' @param npar (`integer()`) \cr
+                      #' Number of the parameters.
+                      #' @param latent (`integer(1)`) \cr
+                      #' The number of latent classes
+                      #' @param family (`character(1)|character()`) \cr
+                      #' The distribution family which can be either a string like "gaussian"
+                      #' or a vector like `c("gaussian", "gaussian")`.
+                      #' @return
+                      #' Return the optimization result with the estimates, 
+                      #' the Loglikelihood value and the information criteria.
                       fit = function(data_model, theta, ll, gr, hidden, pi_vector,
                                      npar, latent, family) {
                         result <- suppressWarnings(optim(theta,
@@ -23,22 +47,7 @@ OptimBase <- R6Class("OptimBase",
                                                          gr,
                                                          method="BFGS",
                                                          hessian=T))
-     
-                        # result <- suppressWarnings(lbfgs(ll,
-                        #                                  gr,
-                        #                                  theta,
-                        #                                  invisible=1))
-                        # browser()
-                        # result <- suppressWarnings(optimx(theta,
-                        #                                  ll,
-                        #                                  gr,
-                        #                                  method="L-BFGS-B",
-                        #                                  hessian=T))
-                        
-                        #result$coef <- coef(result)
-                        #browser()
-                        # result$df <- nrow(data_model$X) - (length(result$par) + latent - 1)
-                        # ny <- 1
+  
                         # if ("multinom" %in% family) {
                         #   ny <- ncol(data_model$Y)
                         #   result$df <- result$df*ny

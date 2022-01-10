@@ -2,7 +2,7 @@
 % Please edit documentation in R/AbstractMethod.R
 \name{AbstractMethod}
 \alias{AbstractMethod}
-\title{An Abstract Class for Estimation Methods}
+\title{An Abstract Class for Methods}
 \value{
 No return.
 @description
@@ -10,7 +10,7 @@ The initialize function for the AbstractMethod class:
 This abstract class cannot be initialized
 }
 \description{
-An abstract class for estimation methods which cannot be initialized.
+An abstract class for methods which cannot be initialized.
 }
 \author{
 Dongjie Wu

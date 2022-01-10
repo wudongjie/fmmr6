@@ -1,6 +1,25 @@
 # fmmr6
 Finite Mixture Modelling (FMM) based on the R6 object system.
 
+## Introduction
+
+The `fmmr6` package is a R package for implementing modeling based on finite mixture distributions. It adopts R6 – an Object-Oriented system in R which encapsulates data and method into an object like other OO programming language such as C and Java. Although there are alternative packages and software available for FMM, these packages have limited choices on models (e.g., rarely used models or self-defined models) and estimation methods.
+This package is originally designed to fit the finite mixture of "log-multiplicative layer effect" models. It is designed in a way that it can be easily extended to other models. It adopts a flexible and extendable structure with more choices on models and estimation methods. The main features are listed below:
+
+### Flexibility:  
+
+Finite mixture modelling can be used with different models and analyses (e.g., Generalized linear model, Categorical data analysis, etc.). It could also provide a way to estimate a user-defined model.  
+
+### Extendibility: 
+
+On the current version, the fmmr6 package uses the EM-algorithms to estimate the mixture models. On the R6 system, these methods are encapsulated in separated objects so that adding another method (e.g., MCMC, Bayesian methods) would not affect old methods.
+
+###User Friendly Interface: 
+
+Using and implementing fmmr6 with different choices of models and data structures is as easy as a single line of code. See the example below.
+
+
+
 ## Installation
 
 Install and test this ongoing package from Github:
@@ -42,5 +61,4 @@ model_mn <- fmglm$new(formula, data, family="multinom",
 
 
 ## TODO
-`fmcat`: Finite Mixture of Categorical Data 
-(e.g. the log-multiplicative uniform difference model (unidiff), the log-multiplicative layer effect model)
+1. Add the concomitant variable models. 

@@ -11,8 +11,7 @@ test_that("test e-step", {
   formula <- Y ~ 0 + x1 + x2
   data <- data.frame(Y=Y, x1=x1, x2=x2)
   dm1 <- DataModel$new(data, formula, family="gaussian")  
-  mix1 <-  Mixer$new(family="gaussian", latent=2)
-  y_result <- em$new(mix1, dm1)$estep(theta, pi_v)
+  y_result <- em$new(latent, dm1)$estep(theta, pi_v)
   z <- vectorize_dummy(kmeans(cbind(Y,X), 2)$cluster)
   y_expect <- c(36, 64)
   expect_equal(colSums(y_result), y_expect, tolerance=1e-1)
@@ -34,10 +33,8 @@ test_that("test m-step", {
   formula <- Y ~ 0 + x1 + x2
   data <- data.frame(Y=Y, x1=x1, x2=x2)
   dm1 <- DataModel$new(data, formula, family="gaussian")  
-  mix1 <- Mixer$new(family="gaussian", latent=2)
-  em1 <- em$new(mix1, dm1)
+  em1 <- em$new(latent, dm1)
   y_result <- em1$estep(theta, pi_v)
-  ll <- mix1$mix_ll()
   result <- em1$mstep(y_result, theta)
   expect_equal(result$par, matrix(theta, ncol=1), tolerance = 0.1)
 })
@@ -54,13 +51,11 @@ test_that("test fit", {
   start1 <- matrix(c(3,0.2,1,3,5,5,2,2), ncol=1)
   start2 <- c(1,1,1,1,1,1,1,1)
   pi_v <- c(0.5, 0.5)
-  mix1 <- Mixer$new(family="gaussian", latent=2)
   dm1 <- DataModel$new(NPreg, formula, family="gaussian")  
   
-  em2 <- em$new(mix1, dm1, start=start1, optim_method="glm")
-  browser()
+  em2 <- em$new(latent, dm1, start=start1, optim_method="glm")
   result2 <- em2$fit(algo="em")
-  em1 <- em$new(mix1, dm1, start=start1)
+  em1 <- em$new(latent, dm1, start=start1)
   result <- em1$fit(algo="em")
   mod2 <- flexmix::flexmix(yn~x+x2, data=NPreg, k=2) 
   result_mod2 <- rbind(parameters(mod2, component=1), 

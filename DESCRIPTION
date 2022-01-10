@@ -14,8 +14,6 @@ Roxygen: list(markdown = TRUE, r6 = TRUE)
 RoxygenNote: 7.1.1
 Imports: Rcpp (>= 1.0.7)
 LinkingTo: Rcpp, RcppArmadillo
-Depends:
-  R6, optimx, numDeriv, flexmix, pracma, Rmixmod, fastDummies, nnet, bbmle
-Suggests:
-    testthat (>= 3.0.0)
+Depends: R6, numDeriv, flexmix, fastDummies, nnet, Matrix
+Suggests: testthat (>= 3.0.0)
 Config/testthat/edition: 3

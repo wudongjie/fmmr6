@@ -13,12 +13,43 @@
 
 DataModel <- R6Class("DataModel", 
                   public = list(
+                    #' @field formula (`formula(1)`)\cr
+                    #' The formula used in the model.
                     formula = NULL,
-                    data_format = "data.table",
+                    
+                    #' @field data_format (`character(1)`)\cr
+                    #' The data format: default is "data.frame".
+                    data_format = "data.frame",
+                    
+                    #' @field data (`data.frame()|data.table()|table()`)\cr
+                    #' Data used in the model.
                     data = NULL,
+                    
+                    #' @field X (`matrix()`)\cr
+                    #' The matrix of the independent variables.
                     X = NULL,
+                    
+                    #' @field Y (`matrix()`)\cr
+                    #' The matrix of the dependent variables.
                     Y = NULL,
+                    
+                    #' @field Y_coln (`character()`)\cr
+                    #' The column value labels.
+                    Y_coln = NULL,
+                    
+                    #' @field family (`character(1)`)\cr
+                    #' The distribution family of the model.
                     family = NULL,
+                    
+                    #' @description Initialize and generate the `DataModel` object.
+                    #' @param data (`data.frame()|data.table()|table()`)\cr
+                    #' Data used in the model.
+                    #' @param formula (`formula(1)`)\cr
+                    #' The formula used in the model.
+                    #' @param family (`character(1)`)\cr
+                    #' The distribution family of the model.
+                    #' @param mn_base (`integer(1)`) \cr
+                    #' Determine which column of the multinomial variable is set to be the base group.
                     initialize = function(data, formula, family, mn_base=1) {
                       if (!inherits(formula,"formula")) {
                         stop("fm_formula is not a formula!")
@@ -40,7 +71,8 @@ DataModel <- R6Class("DataModel",
                         y_col <- unique(model.frame(formula, data)[,1])
                         self$Y <- fastDummies::dummy_columns(model.frame(formula, data)[,1],
                                                         remove_selected_columns = T)
-                        colnames(self$Y) <- y_col
+                        self$Y <- as.matrix(self$Y)
+                        self$Y_coln <- y_col
                         if (is.numeric(mn_base)) {
                           self$Y <- self$Y[,-mn_base]
                         } else if (is.character(mn_base)) {

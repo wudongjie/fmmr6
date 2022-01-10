@@ -16,27 +16,49 @@
 fmglm <- R6Class("fmglm",
     inherit = fmmr6,
     public = list(
+        #' @field data_model (`DataModel()`) \cr
+        #' The DataModel Object that stores the data using in the fmmr6.
         data_model = NULL,
+        
+        #' @field family (`character(1)|character()`) \cr
+        #' The distribution family which can be either a string like "gaussian"
+        #' or a vector like `c("gaussian", "gaussian")`.
         family = NULL,
+        
+        #' @field latent (`integer(1)`) \cr
+        #' The number of latent classes.
         latent = NULL,
+        
+        #' @field method (`character(1)`) \cr
+        #' The estimation method to fit the fmglm.
         method = NULL,
+        
+        #' @field start (`matrix()`) \cr
+        #' The starting values for the fmglm.
         start = NULL,
+        
+        #' @field constraint (`matrix()`) \cr
+        #' The constraint matrix.
+        constraint = NULL,
+        
+        #' @field optim_method (`character(1)`) \cr
+        #' The optimization method to use to fit the model.
         optim_method = NULL,
         #' @description
         #' Create a new instance of this [R6] [R6::R6Class] class.
         #' @param formula (`formula(1)`) \cr
-        #' The formula/expression of the model to fit in the fmglm
+        #' The formula/expression of the model to fit in the fmglm.
         #' @param data (`data.frame()`) \cr
-        #' The Data used in the fmglm
+        #' The Data used in the fmglm.
         #' @param family (`character(1)|character()`) \cr
-        #' The distribution family which can be either a string like "gaussian"
-        #' or a vector like `c("gaussian", "poisson")`
+        #' The distribution family which can be either a string like "gaussian".
+        #' or a vector like `c("gaussian", "gaussian")`.
         #' @param latent (`integer(1)`) \cr
-        #' The number of latent classes
+        #' The number of latent classes.
         #' @param method (`character(1)`) \cr
-        #' The estimation method to fit the fmglm
+        #' The estimation method to fit the fmglm.
         #' @param start (`matrix()`) \cr
-        #' The starting values for the fmglm
+        #' The starting values for the fmglm.
         #' @param optim_method (`character(1)`) \cr
         #' The optimization method to use to fit the model.
         #' The default is `base`.
@@ -45,59 +67,29 @@ fmglm <- R6Class("fmglm",
         #' The default is `TRUE`.
         #' @param mn_base (`integer(1)`) \cr
         #' Determine which column of the multinomial variable is set to be the base group.
+        #' @param constraint (`matrix()`) \cr
+        #' The constraint matrix.
         #' @return Return a R6 object of class fmglm
+
         initialize = function(formula, data, family="gaussian", latent=2,
                               method="em", start=NULL, optim_method="base", 
-                              use_llc=TRUE, mn_base=1) {
+                              use_llc=TRUE, mn_base=1,constraint=matrix(1)) {
             self$start <- start
             self$optim_method <- optim_method
             self$latent <- latent
             self$family <- family
             self$data_model <- DataModel$new(data, formula, family=family, mn_base=mn_base)
-            # for (l in 1:latent) {
-            #     if (family_group[l]=='gaussian') {
-            #         label_row <- c("sigma",colnames(private$X))
-            #     } else {
-            #         label_row <- c(colnames(private$X))
-            #     }
-            #     
-            #     label <- sapply(label_row, 
-            #                     function(x){
-            #                         return(paste(l,x,sep="."))
-            #                     })
-            #     
-                
-            # if (family=="multinom") {
-            #   y_col <- unique(model.frame(formula, data)[,1])
-            #   private$Y <- fastDummies::dummy_columns(model.frame(formula, data)[,1],
-            #                                   remove_selected_columns = T)
-            #   colnames(private$Y) <- y_col
-            #   if (is.numeric(mn_base)) {
-            #     private$Y <- private$Y[,-mn_base]
-            #   } else if (is.character(mn_base)) {
-            #     if (mn_base %in% y_col) {
-            #       d_ind <- which(mn_base %in% y_col)[1]
-            #       private$Y <- private$Y[,-d_ind]
-            #     } else {
-            #       stop("Wrong baseline value!")
-            #     }
-            #   } else {
-            #     stop("Wrong baseline value!")
-            #   }
-            # } else {
-            #   private$Y <-  matrix(model.frame(formula, data)[,1], ncol=1)
-            # }
-            # private$X <- model.matrix(formula, data)
-            private$.mixer <- Mixer$new(family=family, latent=latent, use_llc=use_llc)
-
+            self$constraint <- constraint
             # check the start value
             if (method == "mle") {
-                self$method <- mle$new(private$.mixer, self$data_model,
-                                          start=private$start, optim_method=self$optim_method, use_llc=use_llc)
+                self$method <- mle$new(self$latent, self$data_model,
+                                       start=self$start, optim_method=self$optim_method, 
+                                       use_llc=use_llc, constraint=self$constraint)
             } 
             if (method == "em") {
-              self$method <- em$new(private$.mixer, self$data_model,
-                                       start=self$start, optim_method=self$optim_method, use_llc=use_llc)
+              self$method <- em$new(self$latent, self$data_model,
+                                    start=self$start, optim_method=self$optim_method, 
+                                    use_llc=use_llc, constraint=self$constraint)
             }
         },
         
@@ -130,6 +122,7 @@ fmglm <- R6Class("fmglm",
             return(private$.result)
             #return(self$summary(result))
         },
+        
         #' @description 
         #' Generate a summary for the result.
         #' @param digits (`integer(1)`) \cr
@@ -140,22 +133,20 @@ fmglm <- R6Class("fmglm",
             stop("Please fit the model first.")
           }
           latent <- self$latent
-          
-          if (latent == 1) {
-            family_group <- c(self$family)
-          } else {
-            family_group <- private$.mixer$get_family_init()
-          }
+          family_group <- self$family
+
           pi <-  result$pi_vector
           pi_list <- list()
           npar <- nrow(result$par) / latent
-          ny <- 1
-          if ("multinom" %in% family_group) {
-              ny <- ncol(self$data_model$Y)
-              df <- df*ny
-          }
-          kpar <- length(result$par) / ny
+          ny <- ncol(self$data_model$Y)
+          result$df <- ny*nrow(self$data_model$Y) - sum(result$par != 0)
 
+          kpar <- length(result$par) / ny
+          result$sddev <- sqrt(diag(solve(result$hessian)))
+          result$tvalue <- result$par/result$sddev
+          #result$pvalue <- pt(result$tvalue, result$df, lower.tail=FALSE)
+          result$pvalue <- 2*pt(-abs(result$tvalue), result$df)
+          result$p_ast <- add_ast(result$pvalue)
           total_list <- list()
 
           for (k in 1:ny) {
@@ -170,7 +161,7 @@ fmglm <- R6Class("fmglm",
             # group everything by components
             label_col <- c("Estimates", "Sd.Dev", "t-value", "P-value", "sig")
             for (l in 1:latent) {
-              if (family_group[l]=='gaussian') {
+              if (family_group=='gaussian') {
                   label_row <- c("sigma",colnames(self$data_model$X))
               } else {
                   label_row <- c(colnames(self$data_model$X))
@@ -196,7 +187,7 @@ fmglm <- R6Class("fmglm",
             }
             logLik <- - result$value
             total<- list(coefficients=sum_df)
-            if (family_group[l]=='multinom') {
+            if (family_group=='multinom') {
               total_list[[colnames(self$data_model$Y)[k]]] <- total
             } else {
               total_list[['coefficients']] <- sum_df
@@ -210,7 +201,6 @@ fmglm <- R6Class("fmglm",
         }
     ),
     private = list(
-        .mixer = NULL,
         .result = NULL
     )
 )

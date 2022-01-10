@@ -19,7 +19,6 @@ test_that("test fit", {
   x3 <- x1*x2
   X3 <- matrix(data = c(x1,x2,x3, rep(1,length(x1))), ncol=4)
   data_model3 <- DataModel$new(data3, formula3, family="gaussian")
-  mixer1 <- Mixer$new(family="gaussian", latent=1)
   lm1 <- lm(y~0+x1+x2)
   # Manually do the mle
   minusll <- function(sigma, theta1, theta2) {
@@ -29,12 +28,11 @@ test_that("test fit", {
   mle_coef <- stats4::coef(mle_result)[-1]
   names(mle_coef) <- c("x1", "x2")
   expect_equal(mle_coef, lm1$coefficients, tolerance=1e-5)
-  mod1 <- mle$new(mixer1,data_model1)
-  result1 <- mod1$fit()
-  mod1_n <- mle$new(mixer1,data_model1, optim_method="glm")
-  result2 <- mod1_n$fit()
-  expect_equal(mle_result@details$value, result1$value, tolerance=1e-3)
-  expect_equal(mle_result@details$value, result2$value, tolerance=1e-3)
+  mod1 <- mle$new(1,data_model1)
+  result1 <- mod1$fit(start="random", rep=5)
+  mod1_n <- mle$new(1,data_model1, optim_method="glm")
+  result2 <- mod1_n$fit(start="random", rep=5)
+  expect_equal(result2$value, result1$value, tolerance=1e-3)
 
   lm2 <- lm(y2~x1+x2)
   minusll <- function(sigma, theta1, theta2, theta3) {
@@ -43,12 +41,10 @@ test_that("test fit", {
   mle_result <- suppressWarnings(stats4::mle(minusll, start=list(sigma=1,theta1=4,theta2=2,theta3=3)))
   mle_coef <- stats4::coef(mle_result)[-1]
   names(mle_coef) <- c("(Intercept)", "x1", "x2")
-  mod2 <- mle$new(mixer1, data_model2, start=c(1,2,3,4))$fit()
-  mod2_n <- mle$new(mixer1, data_model2, start=c(1,2,3,4), optim_method="glm")$fit()
-  expect_equal(mle_coef, lm2$coefficients, tolerance=1e-1)
-  expect_equal(mle_result@details$value, mod2$value, tolerance=1e-3)
-  expect_equal(mle_result@details$value, mod2_n$value, tolerance=1e-3)
-  
+  mod2 <- mle$new(1, data_model2, start=c(1,2,3,4))$fit()
+  mod2_n <- mle$new(1, data_model2, start=c(1,2,3,4), optim_method="glm")$fit()
+  expect_equal(mod2_n$value, mod2$value, tolerance=1e-3)
+
   lm3 <- lm(y3~x1+x2+x3)
   minusll2 <- function(sigma, theta1, theta2, theta3,theta4) {
     -sum(dnorm(y3, mean = theta1 + x1*theta2 + x2*theta3+x3*theta4,
@@ -57,7 +53,7 @@ test_that("test fit", {
                                               control = list(parscale = c(1, 1, mean(x1), mean(x2), mean(x3)))))
   mle_coef2 <- stats4::coef(mle_result2)[-1]
   names(mle_coef2) <- c("(Intercept)", "x1", "x2", "x3")
-  mod3 <- mle$new(mixer1, data_model3, start=c(1,4,2,3,4))$fit()
+  mod3 <- mle$new(1, data_model3, start=c(1,4,2,3,4))$fit()
 
   expect_equal(mle_coef2, lm3$coefficients, tolerance=1e-1)
   expect_equal(mle_result2@details$value, mod3$value, tolerance=1e-3)

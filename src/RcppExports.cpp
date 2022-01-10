@@ -12,8 +12,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // mix_ll
-NumericVector mix_ll(const arma::vec& theta, const arma::mat& Y, const arma::mat& X, const arma::mat& d, int latent, Rcpp::CharacterVector family, bool isLog);
-RcppExport SEXP _fmmr6_mix_ll(SEXP thetaSEXP, SEXP YSEXP, SEXP XSEXP, SEXP dSEXP, SEXP latentSEXP, SEXP familySEXP, SEXP isLogSEXP) {
+NumericVector mix_ll(const arma::vec& theta, const arma::mat& Y, const arma::mat& X, const arma::mat& d, int latent, Rcpp::CharacterVector family, bool isLog, const arma::mat& constraint);
+RcppExport SEXP _fmmr6_mix_ll(SEXP thetaSEXP, SEXP YSEXP, SEXP XSEXP, SEXP dSEXP, SEXP latentSEXP, SEXP familySEXP, SEXP isLogSEXP, SEXP constraintSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -24,13 +24,32 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type latent(latentSEXP);
     Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type family(familySEXP);
     Rcpp::traits::input_parameter< bool >::type isLog(isLogSEXP);
-    rcpp_result_gen = Rcpp::wrap(mix_ll(theta, Y, X, d, latent, family, isLog));
+    Rcpp::traits::input_parameter< const arma::mat& >::type constraint(constraintSEXP);
+    rcpp_result_gen = Rcpp::wrap(mix_ll(theta, Y, X, d, latent, family, isLog, constraint));
+    return rcpp_result_gen;
+END_RCPP
+}
+// post_pr
+arma::mat post_pr(const arma::vec& theta, const arma::vec& pi_v, const arma::mat& Y, const arma::mat& X, const int& latent, Rcpp::CharacterVector family, const arma::mat& constraint);
+RcppExport SEXP _fmmr6_post_pr(SEXP thetaSEXP, SEXP pi_vSEXP, SEXP YSEXP, SEXP XSEXP, SEXP latentSEXP, SEXP familySEXP, SEXP constraintSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type pi_v(pi_vSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const int& >::type latent(latentSEXP);
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type family(familySEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type constraint(constraintSEXP);
+    rcpp_result_gen = Rcpp::wrap(post_pr(theta, pi_v, Y, X, latent, family, constraint));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_fmmr6_mix_ll", (DL_FUNC) &_fmmr6_mix_ll, 7},
+    {"_fmmr6_mix_ll", (DL_FUNC) &_fmmr6_mix_ll, 8},
+    {"_fmmr6_post_pr", (DL_FUNC) &_fmmr6_post_pr, 7},
     {NULL, NULL, 0}
 };
 

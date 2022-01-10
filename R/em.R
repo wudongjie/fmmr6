@@ -35,7 +35,10 @@ em <- R6Class("em",
                  #' Each rep, the EM_algorithm generates a start.
                  #' It is only useful when `start` is `random`. 
                  #' After all reps, the algorithm will pick the rep with maximum log likelihood.
-                 #' The default value is 1       
+                 #' The default value is 1
+                 #' @param div_tol (`numeric(1)`) \cr
+                 #' Divergence tolerence: the convergence process stops if there are `div_tol` number of 
+                 #' divergence ,i.e. the log-likelihood getting bigger.
                  fit = function(algo="em", max_iter=500, start="random", rep=1, div_tol=10){
                    if (start=="kmeans") {
                      z <- self$em_start(start)
@@ -91,6 +94,19 @@ em <- R6Class("em",
                    return(z)
                  },
                  #' @description Running the EM algorithm, given the start values, the data and number of classes.
+                 #' @param z (`matrix()`) \cr
+                 #' The matrix of the posterior probability. 
+                 #' @param algo (`character(1)`) \cr
+                 #' Specify the type of EM algorithm to use. Can choose `em` stands for the
+                 #' conventional EM algorithm, `cem` stands for the classification EM algorithm,
+                 #' and `sem` stands for the stochastic EM algorithm.
+                 #' The default algorithm is `em`.
+                 #' @param max_iter (`numeric(1)`) \cr
+                 #' Specify the maximum number of iterations for the E-step-M-step loop.
+                 #' The default number is 500.
+                 #' @param div_tol (`numeric(1)`) \cr
+                 #' Divergence tolerence: the convergence process stops if there are `div_tol` number of 
+                 #' divergence ,i.e. the log-likelihood getting bigger.
                  em_algo = function(z, algo, max_iter, div_tol){
                    result <- self$mstep(z, private$.start, optim_method = self$optim_method)
                    pi_vector <- result$pi_vector
@@ -113,7 +129,7 @@ em <- R6Class("em",
                      ll_value <- result$value
                      counter <- counter + 1
                      if (convergence>0) {
-                       divergence <- divergence + 1
+                        divergence <- divergence + 1
                      }
                    }
                    if (divergence < div_tol) {
@@ -135,8 +151,8 @@ em <- R6Class("em",
                  #' The matrix with the diagonal values representing the prior probability `\pi`.
                  #' @return return the probability matrix indicating the posterior probability of individual belonging to each class.      
                  estep = function(theta_update, pi_vector){
-                   hidden <- private$.mixer$post_pr(theta_update, pi_vector, 
-                                                   self$data_model$Y, self$data_model$X)
+                   hidden <- post_pr(theta_update, pi_vector, 
+                                                   self$data_model$Y, self$data_model$X, self$latent, self$data_model$family, constraint=self$constraint)
                    return(hidden)
                  },
                  #' @description Given the posterior probability, generate a matrix to assign
@@ -170,79 +186,24 @@ em <- R6Class("em",
                  #' The matrix of the posterior probability.
                  #' @param theta (`matrix()`) \cr
                  #' The matrix of the coefficients to fit.
-                 #' @param glm_fit (`boolean(1)`) \cr
-                 #' Whether use the `glm.fit()`, `ols.wfit()` or `nnet()` to fit the model.
+                 #' @param optim_method (`character(1)`) \cr
+                 #' The optimization method to use to fit the model.
+                 #' The default is `base`.
                  mstep = function(hidden, theta, optim_method="base"){
                    npar <- self$latent + nrow(theta) * ncol(theta) - 1
                    ll <- partial(private$.likelihood_func, d=hidden, 
                                  Y=self$data_model$Y, X=self$data_model$X,
-                                 latent=self$latent, family=private$.mixer$family_init, isLog=private$.use_llc)
+                                 latent=self$latent, family=self$data_model$family, isLog=private$.use_llc, constraint=self$constraint)
                    gr <- gen_gr(ll)
                    pi_vector = colSums(hidden)/nrow(hidden)
                    sel_optim <- private$dist_list[[optim_method]]
                    init_optim <- eval(sel_optim)$new()
                    result <- init_optim$fit(self$data_model, theta, ll, gr, hidden, pi_vector,
-                                            npar, self$latent, private$.mixer$get_family_init())
-                   # partial <- function(f, ...) {
-                   #   l <- list(...)
-                   #   function(...) {
-                   #     do.call(f, c(l, list(...)))
-                   #   }
-                   # }
-                   # npar <- private$latent + nrow(theta) * ncol(theta) - 1
-                   # ll <- partial(likelihood_func, d=hidden, Y=private$Y, X=private$X)
-                   # gr1 <- gen_gr(ll)
-                   # pi_vector = colSums(hidden)/nrow(hidden)
-                   # lower <-  private$constraint$lower
-                   # upper <-  private$constraint$upper
-                   # 
-                   # if (glm_fit) {
-                   #   result <- list()
-                   #   fam <- private$mixer$get_family_init()
-                   #   result$par <- c()
-                   #   
-                   #   for (k in 1:private$latent) {
-                   #     if (fam[k] == "gaussian") {
-                   #       train <- lm.wfit(private$X, private$Y, w=hidden[,k])
-                   #       coefs <- train$coefficients
-                   #       df <- sum(coefs != 0)  + 1
-                   #       sigma <- sqrt(sum(hidden[,k] * (private$Y - private$X %*% coefs)^2/mean(hidden[,k]))/(nrow(private$X) - df))
-                   #       result$par <- c(result$par, sigma, coefs)
-                   #     } else if (fam[k] == "poisson") {
-                   #       train <- glm.fit(private$X, private$Y, family=poisson(), weights=hidden[,k])
-                   #       coefs <- train$coefficients
-                   #       result$par <- c(result$par, coefs)
-                   #     } else if (fam[k] == "logit") {
-                   #       train <- suppressWarnings(glm.fit(private$X, private$Y, family=quasibinomial(), weights=hidden[,k]))
-                   #       coefs <- train$coefficients
-                   #       result$par <- c(result$par, coefs)
-                   #     } else if (fam[k] == "multinom") {
-                   #       train <- suppressWarnings(nnet::nnet(private$X[,-1], private$Y, weights=hidden[,k], size=0,
-                   #                                            skip = T, entropy = TRUE, trace=F))
-                   #       coefs <- matrix(coef(train), ncol=ncol(private$Y))
-                   #       if (k == 1) {
-                   #         result$par <- coefs
-                   #       } else {
-                   #         result$par <- rbind(result$par, coefs)
-                   #       }
-                   #     }
-                   #   }
-                   #   if (!( "multinom" %in% fam )) {
-                   #     result$par <- matrix(result$par, ncol=1)
-                   #   } 
-                   #   result$pi_vector <- pi_vector
-                   #   result$value <- ll(result$par)
-                   # } else {
-                   #   result <- suppressWarnings(optim(theta, ll, gr=gr1, method="L-BFGS-B",
-                   #                                    hessian=T)) 
-                   #   result$pi_vector <- pi_vector
-                   # }
-                   # 
-                   # result$AIC <- 2 * npar + 2 * result$value
-                   # result$BIC <- npar * log(nrow(private$X)) + 2 * result$value
-
+                                            npar, self$latent, self$data_model$family)
+            
                    return(result)
                  }
+                 
 
                  )
                )

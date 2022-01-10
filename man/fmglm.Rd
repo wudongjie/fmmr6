@@ -41,15 +41,16 @@ where \eqn{p_{ik}} is the posterior probabilty estimated in the E-step.
 This approach is used in other packages, such as \CRANpkg{flexmix}.
 
 Similar to \CRANpkg{flexmix}, we use \code{glm.fit()} and \code{lm.wfit()}, to fit the log-likelihood function by components.
-To use it, set \code{glm_fit} to \code{TRUE} and \code{use_llc} to \code{FALSE}.
+To use it, set \code{optim_method} to either \code{glm} or \code{lm} and \code{use_llc} to \code{FALSE}.
 
 Alternative, FMM can be viewed as a model with incomplete data where the variable to determine individual's class is missing.
 The imputed variable \eqn{z_ik = 1} or {0} captures the classification of each sample.
 Therefore, the complete-data log-likelihood is:
 \deqn{\log L_c = \sum_{k=1}^K \sum_{i=1}^N z_ik \{ \log{\pi} + \log{f_k(y_i|x_i, \theta_k)} \} }
 
-In this package, we use \code{optim} with the L-BFGS-B algorithm to maximize the complete-data log-likelihood.
-And this method is the default method to fit FMM.
+In this package, we use \code{optim} with the BFGS algorithm to maximize the complete-data log-likelihood.
+And this method is the default method to fit FMM. As this method involves a mixed log-likelihood function,
+we use Rcpp to speed up the computation.
 }
 
 \section{Alternative Algorithm to EM-algorithm}{
@@ -80,18 +81,12 @@ Benefit from the chain feature of R6, the code can be written in one line like t
 
 \code{fmglm} can fit finite mixture of multinomial regression models as well.
 In general the code is similar to fitting the mixture of generalized linear models.\preformatted{model_mn <- fmglm$new(formula, data, family="multinom",
-                      latent=2, method="em", glm_fit=F, use_llc=T)
+                      latent=2, method="em")
 }
 
 The difference is that one should prepare the dependent variable as a \code{factor} variable.
 In addition, the parameter \code{mn_base} is available in the constructor for identifying
 the base group of the dependent variable. The default value is \code{1}.
-
-Same as the fitting the mixture of GLM, one can also use the normal log-likelihood and
-set the \code{glm_fit} to \code{TRUE}. Instead of using \code{glm.fit()}, \code{nnet::nnet()} is used to
-fit the mixture of multinomial regression model. The following code is an example:\preformatted{model_mn <- fmglm$new(formula, data, family="multinom",
-                      latent=2, method="em", glm_fit=T, use_llc=F)
-}
 }
 
 \author{
@@ -99,6 +94,33 @@ Dongjie Wu
 }
 \section{Super class}{
 \code{\link[fmmr6:fmmr6]{fmmr6::fmmr6}} -> \code{fmglm}
+}
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{data_model}}{(\code{DataModel()}) \cr
+The DataModel Object that stores the data using in the fmmr6.}
+
+\item{\code{family}}{(\code{character(1)|character()}) \cr
+The distribution family which can be either a string like "gaussian"
+or a vector like \code{c("gaussian", "gaussian")}.}
+
+\item{\code{latent}}{(\code{integer(1)}) \cr
+The number of latent classes.}
+
+\item{\code{method}}{(\code{character(1)}) \cr
+The estimation method to fit the fmglm.}
+
+\item{\code{start}}{(\code{matrix()}) \cr
+The starting values for the fmglm.}
+
+\item{\code{constraint}}{(\code{matrix()}) \cr
+The constraint matrix.}
+
+\item{\code{optim_method}}{(\code{character(1)}) \cr
+The optimization method to use to fit the model.}
+}
+\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -129,9 +151,10 @@ Create a new instance of this \link{R6} \link[R6:R6Class]{R6::R6Class} class.
   latent = 2,
   method = "em",
   start = NULL,
-  glm_fit = F,
-  use_llc = T,
-  mn_base = 1
+  optim_method = "base",
+  use_llc = TRUE,
+  mn_base = 1,
+  constraint = matrix(1)
 )}\if{html}{\out{</div>}}
 }
 
@@ -139,34 +162,37 @@ Create a new instance of this \link{R6} \link[R6:R6Class]{R6::R6Class} class.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{formula}}{(\code{formula(1)}) \cr
-The formula/expression of the model to fit in the fmglm}
+The formula/expression of the model to fit in the fmglm.}
 
 \item{\code{data}}{(\code{data.frame()}) \cr
-The Data used in the fmglm}
+The Data used in the fmglm.}
 
 \item{\code{family}}{(\code{character(1)|character()}) \cr
-The distribution family which can be either a string like "gaussian"
-or a vector like \code{c("gaussian", "poisson")}}
+The distribution family which can be either a string like "gaussian".
+or a vector like \code{c("gaussian", "gaussian")}.}
 
 \item{\code{latent}}{(\code{integer(1)}) \cr
-The number of latent classes}
+The number of latent classes.}
 
 \item{\code{method}}{(\code{character(1)}) \cr
-The estimation method to fit the fmglm}
+The estimation method to fit the fmglm.}
 
 \item{\code{start}}{(\code{matrix()}) \cr
-The starting values for the fmglm}
+The starting values for the fmglm.}
 
-\item{\code{glm_fit}}{(\code{Boolean(1)}) \cr
-Whether use the \code{glm.fit()}, \code{ols.wfit()} or \code{nnet()} to fit the model.
-The default is \code{FALSE}.}
+\item{\code{optim_method}}{(\code{character(1)}) \cr
+The optimization method to use to fit the model.
+The default is \code{base}.}
 
-\item{\code{use_llc}}{(\code{Boolean(1)}) \cr
-Whether to use the complete log-likelihood to fit the model.
+\item{\code{use_llc}}{(\code{boolean(1)}) \cr
+Whether to use the complete log-likelihood or the normal log-likelihood.
 The default is \code{TRUE}.}
 
 \item{\code{mn_base}}{(\code{integer(1)}) \cr
 Determine which column of the multinomial variable is set to be the base group.}
+
+\item{\code{constraint}}{(\code{matrix()}) \cr
+The constraint matrix.}
 }
 \if{html}{\out{</div>}}
 }
@@ -180,7 +206,7 @@ Return a R6 object of class fmglm
 \subsection{Method \code{fit()}}{
 Fit the fmglm model
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{fmglm$fit(algo = "em", max_iter = 500, start = "kmeans", rep = 1)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{fmglm$fit(algo = "em", max_iter = 500, start = "random", rep = 1)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

@@ -12,16 +12,14 @@
 #include <RcppArmadillo.h>
 //#include <boost/math/distributions/normal.hpp>
 //#include <boost/multiprecision/cpp_bin_float.hpp>
-#include "distribution.hpp"
+// #include "distribution.hpp"
 //using namespace boost::math;
 using namespace Rcpp;
 
 // [[Rcpp::depends(RcppArmadillo)]]
 
-arma::mat sigmoid(arma::mat x) {
-    return (arma::log(1/(1+arma::exp(-x))));
-};
 
+// !! need to decide provide the option of not log
 template <class T>
 class Family {
 public:
@@ -42,12 +40,8 @@ public:
     arma::mat l = arma::zeros(Y.n_rows, Y.n_cols);
     for (int i=0; i<Y.n_rows;i++) {
       for (int j=0; j<Y.n_cols; j++) {
-          normal_distribution nd(mean_mat.at(i,j),sd);
-          if (lg) {
-            l.at(i,j) = nd.lpdf(Y.at(i,j));
-        } else {
-            l.at(i,j) = nd.pdf(Y.at(i,j));
-        }
+        //normal_distribution nd(mean_mat.at(i,j),sd);
+        l.at(i,j) = R::dnorm4(Y.at(i,j), mean_mat.at(i,j), sd, lg);
       }
     }
     return l;
@@ -59,16 +53,12 @@ public:
   arma::mat logLik(const arma::vec& theta, const arma::mat& Y,
                    const arma::mat& X, const bool& lg = false)
   {
-    arma::mat mean_mat = (X * theta);
+    arma::mat mean_mat = arma::exp(X * theta); // the precision problem
+    //Rcpp::Rcout << mean_mat << std::endl;
     arma::mat l = arma::zeros(Y.n_rows, Y.n_cols);
     for (int i=0; i<Y.n_rows;i++) {
       for (int j=0; j<Y.n_cols; j++) {
-          poisson_distribution nd(mean_mat.at(i,j));
-          if (lg) {
-            l.at(i,j) = nd.lpdf(Y.at(i,j));
-        } else {
-            l.at(i,j) = nd.pdf(Y.at(i,j));
-        }
+        l.at(i,j) = R::dpois(Y.at(i,j), mean_mat.at(i,j), lg);
       }
     }
     return l;
@@ -77,22 +67,15 @@ public:
 
 class FamilyLogit : public Family<FamilyLogit> {
 public:
+  arma::mat sigmoid(arma::mat x) {
+    return (1/(1+arma::exp(-x)));
+  };
   arma::mat logLik(const arma::vec& theta, const arma::mat& Y,
                    const arma::mat& X, const bool& lg = false)
   {
     arma::mat mean_t = (X * theta);
-    arma::mat mean_mat = sigmoid(mean_t);
     arma::mat l = arma::zeros(Y.n_rows, Y.n_cols);
-    for (int i=0; i<Y.n_rows;i++) {
-      for (int j=0; j<Y.n_cols; j++) {
-          bernoulli_distribution nd(mean_mat.at(i,j));
-          if (lg) {
-            l.at(i,j) = nd.lpdf(Y.at(i,j));
-        } else {
-            l.at(i,j) = nd.pdf(Y.at(i,j));
-        }
-      }
-    }
+    l = (Y % mean_t) - arma::log1p(arma::exp(mean_t));
     return l;
   }
 };
@@ -102,19 +85,11 @@ public:
   arma::mat logLik(const arma::vec& theta, const arma::mat& Y,
                    const arma::mat& X, const bool& lg = false)
   {
-    arma::mat mean_t = (X * theta);
-    arma::mat mean_mat = sigmoid(mean_t);
-    arma::mat l = arma::zeros(Y.n_rows, Y.n_cols);
-    for (int i=0; i<Y.n_rows;i++) {
-      for (int j=0; j<Y.n_cols; j++) {
-          bernoulli_distribution nd(mean_mat.at(i,j));
-          if (lg) {
-            l.at(i,j) = nd.lpdf(Y.at(i,j));
-        } else {
-            l.at(i,j) = nd.pdf(Y.at(i,j));
-        }
-      }
-    }
+    arma::mat theta_t = arma::mat(theta);
+    theta_t.reshape(X.n_cols, Y.n_cols);
+    arma::mat mean_mat = (X * theta_t);
+    arma::vec r = arma::sum((Y % mean_mat), 1) - log(1 + arma::sum(arma::exp(mean_mat), 1));
+    arma::mat l = arma::mat(r);
     return l;
   }
 };

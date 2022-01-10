@@ -13,6 +13,8 @@
 OptimMethod <- R6Class("OptimMethod",
                        inherit = AbstractMethod,
                        public = list(
+                         #' @description 
+                         #' The initialization of the optimization methods.
                          initialize = function() {
                          }
                        ),

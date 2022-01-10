@@ -16,6 +16,30 @@
 OptimNNet <- R6Class("OptimNNet",
                     inherit = OptimMethod,
                     public = list(
+                      #' @description 
+                      #' Run the optimization for the model.
+                      #' @param data_model (`DataModel()`) \cr
+                      #' The DataModel object contains data used in the fmmr6.
+                      #' @param theta (`numeric()`) \cr
+                      #' The coefficients to estimates.
+                      #' @param ll (`function()`) \cr
+                      #' The loglikelihood function.
+                      #' @param gr (`function()`) \cr
+                      #' The gradient function.
+                      #' @param hidden (`matrix()`) \cr
+                      #' The matrix of the posterior probability.
+                      #' @param pi_vector (`numeric()`) \cr
+                      #' A vector of the prior probability `pi`.
+                      #' @param npar (`integer()`) \cr
+                      #' Number of the parameters.
+                      #' @param latent (`integer(1)`) \cr
+                      #' The number of latent classes
+                      #' @param family (`character(1)|character()`) \cr
+                      #' The distribution family which can be either a string like "gaussian"
+                      #' or a vector like `c("gaussian", "gaussian")`.
+                      #' @return
+                      #' Return the optimization result with the estimates, 
+                      #' the Loglikelihood value and the information criteria.
                       fit = function(data_model, theta, ll, gr, hidden, pi_vector,
                                      npar, latent, family) {
                         result <- list()

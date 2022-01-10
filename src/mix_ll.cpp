@@ -8,6 +8,7 @@
 #include <RcppArmadillo.h>
 #include <boost/math/distributions/normal.hpp>
 #include "Family.hpp"
+#include "gen_theta.hpp"
 
 using namespace boost::math;
 using namespace Rcpp;
@@ -23,13 +24,12 @@ using namespace Rcpp;
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 
-template <class T> double family_mixer(const arma::vec& theta, const arma::mat& Y,
+template <class T>
+double family_mixer(const arma::vec& theta, const arma::mat& Y,
                                      const arma::mat& X, const arma::mat& d,
                                      int latent, bool isLog){
     Family<T>* f = new T;
     int npar = theta.n_elem / latent;
-    //int p = X.n_cols;
-    //int n = X.n_rows;
     double l = 0.0;
     arma::rowvec pi_vector = arma::sum(d, 0)/d.n_rows;
     arma::mat result = arma::zeros(Y.n_rows, 1);
@@ -41,6 +41,7 @@ template <class T> double family_mixer(const arma::vec& theta, const arma::mat& 
         arma::mat pi_v = arma::mat(pdist.n_rows,pdist.n_cols,
                                    arma::fill::value(log(pi_vector[i])));
         l = l + accu(d(arma::span(0,(d.n_rows-1)),i) % (pdist+pi_v));
+
       }
     } else {
       arma::mat result = arma::zeros(Y.n_rows, 1);
@@ -54,6 +55,7 @@ template <class T> double family_mixer(const arma::vec& theta, const arma::mat& 
       l = accu(arma::log(result));
     }
       l = -l;
+    delete f;
     return l;
 }
 
@@ -61,34 +63,74 @@ template <class T> double family_mixer(const arma::vec& theta, const arma::mat& 
 
 // [[Rcpp::export]]
 NumericVector mix_ll(const arma::vec& theta, const arma::mat& Y,
-              const arma::mat& X, const arma::mat& d,
-              int latent, Rcpp::CharacterVector family, bool isLog) {
+                     const arma::mat& X, const arma::mat& d,
+                     int latent, Rcpp::CharacterVector family, bool isLog,
+                     const arma::mat& constraint) {
+    double l = 0.0;
+    // d.n_cols = latent
+    if (d.n_cols != latent) {
+        throw std::invalid_argument("d matrix should have 'latent' columns!");
+    }
+
+
+    // set and check family
     std::string fam = Rcpp::as<std::string>(family[0]);
-    double l;
+
+    // Y is multicolumn if family is multinom.
+    if ((fam == "multinom") && (Y.n_cols<2)) {
+        throw std::invalid_argument("Y is not a multi-column variable!");
+    }
+    
     if (fam == "gaussian") {
+        // theta_size = Y.ncols * X.ncols * latent
+        if (theta.size() != Y.n_cols * (X.n_cols+1)*latent) {
+            throw std::invalid_argument("Wrong numbers of estimates!");
+        }
         l = family_mixer<FamilyNormal>(theta, Y,
                                    X, d, latent, isLog);
     } else if (fam == "poisson") {
+        if (theta.size() != Y.n_cols * X.n_cols*latent) {
+            throw std::invalid_argument("Wrong numbers of estimates!");
+        }
         l = family_mixer<FamilyPoisson>(theta, Y,
-                                   X, d, latent, isLog);
-    } else {
+                                    X, d, latent, isLog);
+    } else if (fam == "logit"){
+        if (theta.size() != Y.n_cols * X.n_cols*latent) {
+            throw std::invalid_argument("Wrong numbers of estimates!");
+        }
         l = family_mixer<FamilyLogit>(theta, Y,
-                                 X, d, latent, isLog);
+                                  X, d, latent, isLog);
+    } else if (fam == "multinom") {
+        if ((theta.size() != Y.n_cols * X.n_cols*latent) && (constraint.size() == 1)) {
+          throw std::invalid_argument("Wrong numbers of estimates!");
+        }
+        arma::vec theta_t = arma::vec(Y.n_cols * X.n_cols*latent, arma::fill::zeros);
+        if (constraint.size() != 1) {
+            theta_t = gen_theta(theta, constraint);
+        } else {
+            theta_t = theta;
+        }
+        l = family_mixer<FamilyMultiNomial>(theta_t, Y,
+                                        X, d, latent, isLog);
+    } else {
+        throw std::invalid_argument( "Family does not exist!" );
     }
-
+  
     if (std::isnan(l)) {
         return NumericVector::create(R_NaN);
     } else if (std::isinf(l)) {
         if (l>0) {
             return NumericVector::create(R_PosInf);
-        } else {
-            return NumericVector::create(R_NegInf);
-        }
+    } else {
+        return NumericVector::create(R_NegInf);
     }
-      else {
-          return NumericVector::create(l);
+  }
+    else {
+        return NumericVector::create(l);
     }
 }
+
+
 
 
 // You can include R code blocks in C++ files processed with sourceCpp
