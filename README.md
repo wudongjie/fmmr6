@@ -58,7 +58,6 @@ model_mn <- fmglm$new(formula, data, family="multinom",
 ```
 
 
-
-
 ## TODO
 1. Add the concomitant variable models. 
+
