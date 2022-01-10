@@ -1,3 +1,7 @@
+#' @useDynLib fmmr6
+#' @importFrom Rcpp evalCpp
+#' @exportPattern "^[[:alpha:]]+"
+
 #' @title The Abstract Class of Finite Mixture Models on R6 (fmmr6) 
 #'
 #' @author Dongjie Wu

@@ -25,15 +25,16 @@
 #' This approach is used in other packages, such as \CRANpkg{flexmix}. 
 #' 
 #' Similar to \CRANpkg{flexmix}, we use `glm.fit()` and `lm.wfit()`, to fit the log-likelihood function by components.
-#' To use it, set `glm_fit` to `TRUE` and `use_llc` to `FALSE`.
+#' To use it, set `optim_method` to either `glm` or `lm` and `use_llc` to `FALSE`.
 #' 
 #' Alternative, FMM can be viewed as a model with incomplete data where the variable to determine individual's class is missing.
 #' The imputed variable \eqn{z_ik = 1} or {0} captures the classification of each sample. 
 #' Therefore, the complete-data log-likelihood is:
 #' \deqn{\log L_c = \sum_{k=1}^K \sum_{i=1}^N z_ik \{ \log{\pi} + \log{f_k(y_i|x_i, \theta_k)} \} }
 #' 
-#' In this package, we use `optim` with the L-BFGS-B algorithm to maximize the complete-data log-likelihood. 
-#' And this method is the default method to fit FMM. 
+#' In this package, we use `optim` with the BFGS algorithm to maximize the complete-data log-likelihood. 
+#' And this method is the default method to fit FMM. As this method involves a mixed log-likelihood function, 
+#' we use Rcpp to speed up the computation. 
 #' 
 #' @section Alternative Algorithm to EM-algorithm:
 #' 
@@ -67,20 +68,12 @@
 #' 
 #' ```
 #' model_mn <- fmglm$new(formula, data, family="multinom",
-#'                       latent=2, method="em", glm_fit=F, use_llc=T)
+#'                       latent=2, method="em")
 #' ```
 #' 
 #' The difference is that one should prepare the dependent variable as a `factor` variable.
 #' In addition, the parameter `mn_base` is available in the constructor for identifying 
 #' the base group of the dependent variable. The default value is `1`.
 #' 
-#' Same as the fitting the mixture of GLM, one can also use the normal log-likelihood and
-#' set the `glm_fit` to `TRUE`. Instead of using `glm.fit()`, `nnet::nnet()` is used to
-#' fit the mixture of multinomial regression model. The following code is an example:
-#' 
-#' ```
-#' model_mn <- fmglm$new(formula, data, family="multinom",
-#'                       latent=2, method="em", glm_fit=T, use_llc=F)
-#' ```
-#'    
+
 

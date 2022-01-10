@@ -12,14 +12,15 @@ A concrete R6 object for EM Algorithm.
 \author{
 Dongjie Wu
 }
-\section{Super class}{
-\code{\link[fmmr6:AbstractMethod]{fmmr6::AbstractMethod}} -> \code{em}
+\section{Super classes}{
+\code{\link[fmmr6:AbstractMethod]{fmmr6::AbstractMethod}} -> \code{\link[fmmr6:EstimMethod]{fmmr6::EstimMethod}} -> \code{em}
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{em$new()}}
 \item \href{#method-fit}{\code{em$fit()}}
+\item \href{#method-em_start}{\code{em$em_start()}}
+\item \href{#method-em_algo}{\code{em$em_algo()}}
 \item \href{#method-estep}{\code{em$estep()}}
 \item \href{#method-cstep}{\code{em$cstep()}}
 \item \href{#method-sstep}{\code{em$sstep()}}
@@ -30,44 +31,12 @@ Dongjie Wu
 \if{html}{
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
+\item \out{<span class="pkg-link" data-pkg="fmmr6" data-topic="EstimMethod" data-id="gen_constraint">}\href{../../fmmr6/html/EstimMethod.html#method-gen_constraint}{\code{fmmr6::EstimMethod$gen_constraint()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="fmmr6" data-topic="EstimMethod" data-id="gen_start">}\href{../../fmmr6/html/EstimMethod.html#method-gen_start}{\code{fmmr6::EstimMethod$gen_start()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="fmmr6" data-topic="EstimMethod" data-id="initialize">}\href{../../fmmr6/html/EstimMethod.html#method-initialize}{\code{fmmr6::EstimMethod$initialize()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="fmmr6" data-topic="EstimMethod" data-id="partial">}\href{../../fmmr6/html/EstimMethod.html#method-partial}{\code{fmmr6::EstimMethod$partial()}}\out{</span>}
 }
 \out{</details>}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
-\subsection{Method \code{new()}}{
-Create a new instance of this \link{R6} \link[R6:R6Class]{R6::R6Class} class.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{em$new(mixer, Y, X, start = NULL, constraint = NULL, glm_fit = F)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{mixer}}{(\code{Mixer(1)}) \cr
-A mixer object contains the mixed density function of the model.}
-
-\item{\code{Y}}{(\code{matrix()}) \cr
-A matrix with 1 or k columns contains the dependent variable/variables.}
-
-\item{\code{X}}{(\code{matrix()}) \cr
-A matrix with m column contains m independent variables.}
-
-\item{\code{start}}{(\code{matrix()}) \cr
-The matrix of start values for the EM algorithm.}
-
-\item{\code{constraint}}{(\code{matrix()}) \cr
-The matrix of constraint values for the EM algorithm}
-
-\item{\code{glm_fit}}{(\code{boolean(1)}) \cr
-Whether use the \code{glm.fit()}, \code{ols.wfit()} or \code{nnet()} to fit the model.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Return a R6 object of class em.
-}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-fit"></a>}}
@@ -75,7 +44,7 @@ Return a R6 object of class em.
 \subsection{Method \code{fit()}}{
 Fit the model using the EM algorithm
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{em$fit(algo = "em", max_iter = 500, start = "kmeans", rep = 1)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{em$fit(algo = "em", max_iter = 500, start = "random", rep = 1, div_tol = 10)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -105,6 +74,64 @@ Each rep, the EM_algorithm generates a start.
 It is only useful when \code{start} is \code{random}.
 After all reps, the algorithm will pick the rep with maximum log likelihood.
 The default value is 1}
+
+\item{\code{div_tol}}{(\code{numeric(1)}) \cr
+Divergence tolerence: the convergence process stops if there are \code{div_tol} number of
+divergence ,i.e. the log-likelihood getting bigger.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-em_start"></a>}}
+\if{latex}{\out{\hypertarget{method-em_start}{}}}
+\subsection{Method \code{em_start()}}{
+Generate the start value for the EM algorithm.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{em$em_start(start = "kmeans")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{start}}{(\code{character(1)}) \cr
+Specify the starting method of the EM algorithm.
+Can either start from \code{kmeans} or \code{random}.
+\code{kmeans} use the K-mean methods to put samples into latent classes.
+\code{random} randomly assigns samples into latent classes.
+The default method is \code{kmeans}.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-em_algo"></a>}}
+\if{latex}{\out{\hypertarget{method-em_algo}{}}}
+\subsection{Method \code{em_algo()}}{
+Running the EM algorithm, given the start values, the data and number of classes.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{em$em_algo(z, algo, max_iter, div_tol)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{z}}{(\code{matrix()}) \cr
+The matrix of the posterior probability.}
+
+\item{\code{algo}}{(\code{character(1)}) \cr
+Specify the type of EM algorithm to use. Can choose \code{em} stands for the
+conventional EM algorithm, \code{cem} stands for the classification EM algorithm,
+and \code{sem} stands for the stochastic EM algorithm.
+The default algorithm is \code{em}.}
+
+\item{\code{max_iter}}{(\code{numeric(1)}) \cr
+Specify the maximum number of iterations for the E-step-M-step loop.
+The default number is 500.}
+
+\item{\code{div_tol}}{(\code{numeric(1)}) \cr
+Divergence tolerence: the convergence process stops if there are \code{div_tol} number of
+divergence ,i.e. the log-likelihood getting bigger.}
 }
 \if{html}{\out{</div>}}
 }
@@ -182,23 +209,21 @@ of latent classes, the indicator variable, the likelihood
 function, solve the maximum value of the likelihood
 function and update the parameter vectors theta.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{em$mstep(likelihood_func, hidden, theta, glm_fit = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{em$mstep(hidden, theta, optim_method = "base")}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{likelihood_func}}{(\verb{function(1)}) \cr
-The likelihood function to maximize.}
-
 \item{\code{hidden}}{(\code{matrix()}) \cr
 The matrix of the posterior probability.}
 
 \item{\code{theta}}{(\code{matrix()}) \cr
 The matrix of the coefficients to fit.}
 
-\item{\code{glm_fit}}{(\code{boolean(1)}) \cr
-Whether use the \code{glm.fit()}, \code{ols.wfit()} or \code{nnet()} to fit the model.}
+\item{\code{optim_method}}{(\code{character(1)}) \cr
+The optimization method to use to fit the model.
+The default is \code{base}.}
 }
 \if{html}{\out{</div>}}
 }

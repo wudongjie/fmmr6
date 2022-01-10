@@ -1,9 +1,9 @@
-#' @title An Abstract Class for Estimation Methods
+#' @title An Abstract Class for Methods
 #' 
 #' @import R6
 #' @author Dongjie Wu
 #'
-#' @description An abstract class for estimation methods which cannot be initialized.
+#' @description An abstract class for methods which cannot be initialized.
 #'
 #' @name AbstractMethod
 #'
