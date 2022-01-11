@@ -106,7 +106,6 @@ test_that("test multinomial", {
   gss_test$col_ses <- ifelse(((gss_test$ed3cat==3) & (gss_test$ses2cat==1)), 1, 0)
   formula <- ed3cat ~ hs_sib + col_sib + hs_ses + col_ses
   formula2 <- ed3cat ~ sib + ses2cat
-  browser()
   cmat <- matrix(c(0,1,1,1,0,0),nrow=3, ncol=2)
   print(dim(cmat))
   model_s <- fmglm$new(formula2, gss_test, family="multinom",
@@ -115,7 +114,6 @@ test_that("test multinomial", {
                        latent=1, method="mle", use_llc=T, constraint=cmat)
   model1 <- fmglm$new(formula, gss_test, family="multinom",
                       latent=2, method="em", use_llc=T)
-  browser()
   model2 <- fmglm$new(formula, gss_test, family="multinom",
                         latent=2, method="em", use_llc=T, constraint=cmat)
   result_s <- model_s$fit()

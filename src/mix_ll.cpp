@@ -6,11 +6,9 @@
 //
 #include <iostream>
 #include <RcppArmadillo.h>
-#include <boost/math/distributions/normal.hpp>
 #include "Family.hpp"
 #include "gen_theta.hpp"
 
-using namespace boost::math;
 using namespace Rcpp;
 
 // This is a simple example of exporting a C++ function to R. You can

@@ -10,10 +10,7 @@
 
 #include <stdio.h>
 #include <RcppArmadillo.h>
-//#include <boost/math/distributions/normal.hpp>
-//#include <boost/multiprecision/cpp_bin_float.hpp>
-// #include "distribution.hpp"
-//using namespace boost::math;
+
 using namespace Rcpp;
 
 // [[Rcpp::depends(RcppArmadillo)]]
