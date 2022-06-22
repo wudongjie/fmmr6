@@ -12,8 +12,8 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE, r6 = TRUE)
 RoxygenNote: 7.1.1
-Imports: Rcpp (>= 1.0.7)
+Imports: Rcpp (>= 1.0.7), numDeriv, flexmix, fastDummies, nnet, Matrix
 LinkingTo: Rcpp, RcppArmadillo
-Depends: R6, numDeriv, flexmix, fastDummies, nnet, Matrix
+Depends: R6
 Suggests: testthat (>= 3.0.0)
 Config/testthat/edition: 3

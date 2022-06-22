@@ -24,14 +24,14 @@ using namespace Rcpp;
 // [[Rcpp::depends(RcppArmadillo)]]
 
 template <class T>
-arma::mat pp_mixer(const arma::vec& theta, const arma::vec& pi_v,
+arma::mat pp_mixer(const arma::vec& theta, const arma::mat& pi_m,
                 const arma::mat& Y, const arma::mat& X, const int& latent){
   Family<T>* f = new T;
   int npar = theta.n_elem / latent;
   //int p = X.n_cols;
   //int n = X.n_rows;
-  arma::mat pi_m = arma::diagmat(pi_v);
-  arma::mat z_m = arma::zeros(Y.n_rows, latent);
+  //arma::mat pi_m = arma::diagmat(pi_v);
+  arma::mat z_m = arma::zeros(pi_m.n_rows, latent);
   arma::mat theta_t = arma::mat(theta);
   for (int i=0; i<latent;i++) {
       arma::vec theta_l = theta.subvec((npar*i), (npar*i+npar-1));
@@ -41,7 +41,7 @@ arma::mat pp_mixer(const arma::vec& theta, const arma::vec& pi_v,
       //Rcpp::Rcout << z_m << std::endl;
   }
   arma::mat z_sum = arma::zeros(z_m.n_rows, z_m.n_cols);
-  arma::mat z_w = z_m*pi_m;
+  arma::mat z_w = z_m%pi_m;
   for (int i=0; i<latent;i++) {
       z_sum.col(i) = arma::sum(z_w, 1);
   }
@@ -54,9 +54,9 @@ arma::mat pp_mixer(const arma::vec& theta, const arma::vec& pi_v,
 
 
 // [[Rcpp::export]]
-arma::mat post_pr(const arma::vec& theta, const arma::vec& pi_v,
+arma::mat post_pr(const arma::vec& theta, const arma::mat& pi_m,
                       const arma::mat& Y, const arma::mat& X, const int& latent,
-                      Rcpp::CharacterVector family, const arma::mat& constraint) {
+                      Rcpp::CharacterVector family, const arma::mat& constraint=arma::zeros(1,1)) {
     arma::mat z;
 
     // set and check family
@@ -68,17 +68,20 @@ arma::mat post_pr(const arma::vec& theta, const arma::vec& pi_v,
     }
     
     if (fam == "gaussian") {
-        z = pp_mixer<FamilyNormal>(theta, pi_v, Y,
+        z = pp_mixer<FamilyNormal>(theta, pi_m, Y,
                                        X, latent);
     } else if (fam == "poisson") {
-        z = pp_mixer<FamilyPoisson>(theta, pi_v, Y,
+        z = pp_mixer<FamilyPoisson>(theta, pi_m, Y,
                                         X, latent);
     } else if (fam == "logit"){
-        z = pp_mixer<FamilyLogit>(theta, pi_v, Y,
+        z = pp_mixer<FamilyLogit>(theta, pi_m, Y,
+                                      X, latent);
+    } else if (fam == "clogit"){
+        z = pp_mixer<FamilyConditionalLogit>(theta, pi_m, Y,
                                       X, latent);
     } else if (fam == "multinom") {
         if ((theta.size() != Y.n_cols * X.n_cols*latent) && (constraint.size() == 1)) {
-          throw std::invalid_argument("Wrong numbers of estimates!");
+            throw std::invalid_argument("Wrong numbers of estimates!");
         }
         arma::vec theta_t = arma::vec(Y.n_cols * X.n_cols*latent, arma::fill::zeros);
         if (constraint.size() != 1) {
@@ -86,8 +89,11 @@ arma::mat post_pr(const arma::vec& theta, const arma::vec& pi_v,
         } else {
             theta_t = theta;
         }
-        z = pp_mixer<FamilyMultiNomial>(theta_t, pi_v, Y,
+        z = pp_mixer<FamilyMultiNomial>(theta_t, pi_m, Y,
                                             X, latent);
+    } else if (fam == "unidiff") {
+        z = pp_mixer<FamilyUnidiff>(theta, pi_m, Y,
+                                        X, latent);
     } else {
         throw std::invalid_argument( "Family does not exist!" );
     }

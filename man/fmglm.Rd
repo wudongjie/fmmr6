@@ -117,6 +117,10 @@ The starting values for the fmglm.}
 \item{\code{constraint}}{(\code{matrix()}) \cr
 The constraint matrix.}
 
+\item{\code{concomitant}}{(\code{formula(1)})\cr
+The formula to model the concomitant model.
+The default value is NULL.}
+
 \item{\code{optim_method}}{(\code{character(1)}) \cr
 The optimization method to use to fit the model.}
 }
@@ -147,11 +151,14 @@ Create a new instance of this \link{R6} \link[R6:R6Class]{R6::R6Class} class.
 \if{html}{\out{<div class="r">}}\preformatted{fmglm$new(
   formula,
   data,
+  data_str = "default",
+  data_var = NULL,
   family = "gaussian",
   latent = 2,
   method = "em",
   start = NULL,
   optim_method = "base",
+  concomitant = NULL,
   use_llc = TRUE,
   mn_base = 1,
   constraint = matrix(1)
@@ -184,6 +191,9 @@ The starting values for the fmglm.}
 The optimization method to use to fit the model.
 The default is \code{base}.}
 
+\item{\code{concomitant}}{(\code{formula(1)}) \cr
+The formula for the concomitant model. E.g. \code{~ z1 + z2 + z3}.}
+
 \item{\code{use_llc}}{(\code{boolean(1)}) \cr
 Whether to use the complete log-likelihood or the normal log-likelihood.
 The default is \code{TRUE}.}
@@ -206,7 +216,7 @@ Return a R6 object of class fmglm
 \subsection{Method \code{fit()}}{
 Fit the fmglm model
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{fmglm$fit(algo = "em", max_iter = 500, start = "random", rep = 1)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{fmglm$fit(algo = "em", max_iter = 500, start = "random", rep = 1, verbose = F)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -237,6 +247,9 @@ Each rep, the EM_algorithm generates a start.
 It is only useful when \code{start} is \code{random}.
 After all reps, the algorithm will pick the rep with maximum log likelihood.
 The default value is 1}
+
+\item{\code{verbose}}{(\code{boolean(1)}) \cr
+Print the converging log-likelihood for all steps.}
 }
 \if{html}{\out{</div>}}
 }

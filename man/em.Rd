@@ -44,7 +44,14 @@ Dongjie Wu
 \subsection{Method \code{fit()}}{
 Fit the model using the EM algorithm
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{em$fit(algo = "em", max_iter = 500, start = "random", rep = 1, div_tol = 10)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{em$fit(
+  algo = "em",
+  max_iter = 500,
+  start = "random",
+  rep = 1,
+  div_tol = 10,
+  verbose = F
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -78,6 +85,9 @@ The default value is 1}
 \item{\code{div_tol}}{(\code{numeric(1)}) \cr
 Divergence tolerence: the convergence process stops if there are \code{div_tol} number of
 divergence ,i.e. the log-likelihood getting bigger.}
+
+\item{\code{verbose}}{(\code{bool(1)}) \cr
+Print the converging log-likelihood for all steps.}
 }
 \if{html}{\out{</div>}}
 }
@@ -110,7 +120,7 @@ The default method is \code{kmeans}.}
 \subsection{Method \code{em_algo()}}{
 Running the EM algorithm, given the start values, the data and number of classes.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{em$em_algo(z, algo, max_iter, div_tol)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{em$em_algo(z, algo, max_iter, div_tol, verbose)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -132,6 +142,9 @@ The default number is 500.}
 \item{\code{div_tol}}{(\code{numeric(1)}) \cr
 Divergence tolerence: the convergence process stops if there are \code{div_tol} number of
 divergence ,i.e. the log-likelihood getting bigger.}
+
+\item{\code{verbose}}{(\code{bool(1)}) \cr
+Print the converging log-likelihood for all steps.}
 }
 \if{html}{\out{</div>}}
 }
@@ -209,7 +222,7 @@ of latent classes, the indicator variable, the likelihood
 function, solve the maximum value of the likelihood
 function and update the parameter vectors theta.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{em$mstep(hidden, theta, optim_method = "base")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{em$mstep(hidden, theta, alpha = NULL, optim_method = "base")}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

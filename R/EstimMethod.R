@@ -45,14 +45,23 @@ EstimMethod <- R6Class("EstimMethod",
                             #' The default is `TRUE`.
                             #' @param constraint (`matrix()`) \cr
                             #' The matrix of constraint values for the EM algorithm
+                            #' @param concomitant (`formula(1)`) \cr
+                            #' The formula for the concomitant model. E.g. `~ z1 + z2 + z3`.
                             #' @return Return a R6 object of class em.
-                            initialize = function(latent, data_model, start=NULL, optim_method="base",use_llc=T,constraint=matrix(1)){
+                            initialize = function(latent, data_model, start=NULL, 
+                                                  optim_method="base",use_llc=T,
+                                                  constraint=matrix(1),concomitant=NULL){
                               self$constraint <- constraint
                               self$data_model <- data_model
                               self$latent <- latent
                               self$optim_method <- optim_method
                               private$.use_llc <- use_llc
                               private$.likelihood_func <- mix_ll
+                              if (!is.null(concomitant)){
+                                num_para <- ncol(self$data_model$Z)*self$latent
+                                private$.pi_ll <- pi_ll
+                                private$.start_z <- runif(num_para,-2,2)
+                              }
                               if (!is.null(start)) {
                                 private$.start <- start
                               } else {
@@ -109,7 +118,14 @@ EstimMethod <- R6Class("EstimMethod",
                                 mix_l = c()
                                 mix_h = c()
                                 for (i in 1:latent) {
-                                  if (self$data_model$family=="gaussian") {
+                                  if (self$data_model$family=="unidiff") {
+                                    uY = length(unique(self$data_model$Y)) - 1
+                                    uX = length(unique(self$data_model$X[,1])) - 1
+                                    uZ = length(unique(self$data_model$X[,2])) - 1
+                                    uSize = (uY*(uZ+1)+uY*uX+uZ)
+                                    mix_l = rbind(mix_l, matrix(rep(-Inf, uSize)))
+                                    mix_h = rbind(mix_h, matrix(rep(+Inf, uSize)))
+                                  } else if (self$data_model$family=="gaussian") {
                                     mix_l = rbind(mix_l, matrix(c(0, rep(-Inf, ncol(self$data_model$X)))))
                                     mix_h = rbind(mix_h, matrix(c(+Inf, rep(+Inf, ncol(self$data_model$X)))))
                                   } else {
@@ -129,7 +145,9 @@ EstimMethod <- R6Class("EstimMethod",
                             ),
                             private = list(
                               .likelihood_func = NULL,
+                              .pi_ll = NULL,
                               .start = NULL,
+                              .start_z = NULL,
                               .use_llc = NULL,
                               dist_list = list(
                                 "glm" = quote(OptimGLM),

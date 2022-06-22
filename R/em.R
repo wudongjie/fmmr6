@@ -39,10 +39,12 @@ em <- R6Class("em",
                  #' @param div_tol (`numeric(1)`) \cr
                  #' Divergence tolerence: the convergence process stops if there are `div_tol` number of 
                  #' divergence ,i.e. the log-likelihood getting bigger.
-                 fit = function(algo="em", max_iter=500, start="random", rep=1, div_tol=10){
+                 #' @param verbose (`bool(1)`) \cr
+                 #' Print the converging log-likelihood for all steps.  
+                 fit = function(algo="em", max_iter=500, start="random", rep=1, div_tol=10, verbose=F){
                    if (start=="kmeans") {
                      z <- self$em_start(start)
-                     result <- self$em_algo(z, algo, max_iter, div_tol)
+                     result <- self$em_algo(z, algo, max_iter, div_tol, verbose)
                      if (result$message == "Convergence succeed") {
                        return(result)
                      } else {
@@ -56,7 +58,7 @@ em <- R6Class("em",
                      result_list = list()
                      if (rep==1) {
                        z <- self$em_start(start)
-                       result <- self$em_algo(z, algo, max_iter, div_tol)
+                       result <- self$em_algo(z, algo, max_iter, div_tol, verbose)
                        if (result$message == "Convergence succeed") {
                          return(result)
                        } else {
@@ -67,7 +69,7 @@ em <- R6Class("em",
                      }
                      for (r in 1:rep) {
                        z <- self$em_start(start)
-                       result <- self$em_algo(z, algo, max_iter, div_tol)
+                       result <- self$em_algo(z, algo, max_iter, div_tol, verbose)
                        result_list[[r]] <-  result
                        ll_list <- c(ll_list, result$value)
                      }
@@ -84,10 +86,26 @@ em <- R6Class("em",
                  #' The default method is `kmeans`.
                  em_start = function(start = "kmeans"){
                    if (start == "random") {
-                     z <- vectorize_dummy(sample(1:self$latent, size=nrow(self$data_model$X), replace=T))
+                     if (self$data_model$family=="clogit") {
+                       n_obs <- length(unique(self$data_model$X_ex[,ncol(self$data_model$X_ex)]))
+                       z <- vectorize_dummy(sample(1:self$latent, size=n_obs, replace=T))
+                     } else {
+                      z <- vectorize_dummy(sample(1:self$latent, size=nrow(self$data_model$X), replace=T))
+                     }
                    } else if (start == "kmeans") {
-                     z <- vectorize_dummy(kmeans(cbind(self$data_model$Y,self$data_model$X), 
+                     if (self$data_model$family=="clogit") {
+                       n_obs <- length(unique(self$data_model$X_ex[,ncol(self$data_model$X_ex)]))
+                       p_obs <- length(self$data_model$X_ex[,ncol(self$data_model$X_ex)])/n_obs
+                       z <- vectorize_dummy(kmeans(cbind(self$data_model$Y,self$data_model$X), 
+                                                   self$latent)$cluster)
+                       z <- ave(self$data_model$Y, 
+                                self$data_model$X_ex[,ncol(self$data_model$X_ex)],
+                                FUN=sum)
+                       z <- ifelse(z>(p_obs/2),1,0)
+                     } else {
+                       z <- vectorize_dummy(kmeans(cbind(self$data_model$Y,self$data_model$X), 
                                                  self$latent)$cluster)
+                     }
                    } else {
                      stop("Please specify the correct starting method!")
                    }
@@ -107,10 +125,15 @@ em <- R6Class("em",
                  #' @param div_tol (`numeric(1)`) \cr
                  #' Divergence tolerence: the convergence process stops if there are `div_tol` number of 
                  #' divergence ,i.e. the log-likelihood getting bigger.
-                 em_algo = function(z, algo, max_iter, div_tol){
-                   result <- self$mstep(z, private$.start, optim_method = self$optim_method)
+                 #' @param verbose (`bool(1)`) \cr
+                 #' Print the converging log-likelihood for all steps.  
+                 em_algo = function(z, algo, max_iter, div_tol, verbose){
+                   result <- self$mstep(z, private$.start, 
+                                        alpha=private$.start_z, 
+                                        optim_method = self$optim_method)
                    pi_vector <- result$pi_vector
                    theta_update <- result$par
+                   alpha_update <- result$alpha
                    convergence <- 1
                    ll_value <- 0
                    counter <- 0
@@ -122,11 +145,15 @@ em <- R6Class("em",
                      } else if (algo=='sem') {
                        z <- self$sstep(z)
                      }
-                     result <- self$mstep(z, private$.start, optim_method = self$optim_method)
+                     result <- self$mstep(z, theta_update, alpha=alpha_update, optim_method = self$optim_method)
                      theta_update <- result$par
+                     alpha_update <- result$alpha
                      pi_vector <- result$pi_vector
                      convergence <- result$value - ll_value
                      ll_value <- result$value
+                     if (verbose) {
+                       print(ll_value)
+                     }
                      counter <- counter + 1
                      if (convergence>0) {
                         divergence <- divergence + 1
@@ -151,8 +178,13 @@ em <- R6Class("em",
                  #' The matrix with the diagonal values representing the prior probability `\pi`.
                  #' @return return the probability matrix indicating the posterior probability of individual belonging to each class.      
                  estep = function(theta_update, pi_vector){
-                   hidden <- post_pr(theta_update, pi_vector, 
+                   if (self$data_model$family=="clogit") {
+                     hidden <- post_pr(theta_update, pi_vector, 
+                                       self$data_model$Y, self$data_model$X_ex, self$latent, self$data_model$family, constraint=self$constraint)
+                   } else {
+                     hidden <- post_pr(theta_update, pi_vector, 
                                                    self$data_model$Y, self$data_model$X, self$latent, self$data_model$family, constraint=self$constraint)
+                   }
                    return(hidden)
                  },
                  #' @description Given the posterior probability, generate a matrix to assign
@@ -189,18 +221,45 @@ em <- R6Class("em",
                  #' @param optim_method (`character(1)`) \cr
                  #' The optimization method to use to fit the model.
                  #' The default is `base`.
-                 mstep = function(hidden, theta, optim_method="base"){
+                 mstep = function(hidden, theta, alpha=NULL, optim_method="base"){
                    npar <- self$latent + nrow(theta) * ncol(theta) - 1
+                   if (self$data_model$family=="clogit") {
+                     ll <- partial(private$.likelihood_func, d=hidden, 
+                                   Y=self$data_model$Y, X=self$data_model$X_ex,
+                                   latent=self$latent, family=self$data_model$family, isLog=private$.use_llc, constraint=self$constraint)
+                   } else {
                    ll <- partial(private$.likelihood_func, d=hidden, 
                                  Y=self$data_model$Y, X=self$data_model$X,
                                  latent=self$latent, family=self$data_model$family, isLog=private$.use_llc, constraint=self$constraint)
+                   }
                    gr <- gen_gr(ll)
-                   pi_vector = colSums(hidden)/nrow(hidden)
+                   result_z <- NULL
+                   if (!is.null(self$data_model$concomitant)){
+                     zll <- partial(private$.pi_ll, d=hidden, 
+                                    X=self$data_model$Z, latent=self$latent)
+                     zgr <- gen_gr(zll)
+                     browser()
+                     result_z <- suppressWarnings(optim(alpha,
+                                                      zll,
+                                                      #zgr,
+                                                      method="BFGS",
+                                                      hessian=T))
+                     pi_vector <- exp(self$data_model$Z %*% matrix(alpha,ncol=self$latent))
+                     pi_vector <- pi_vector/rowSums(pi_vector)
+                   } else {
+                     pi_vector = matrix(colSums(hidden)/nrow(hidden),
+                                        nrow=nrow(hidden), ncol=ncol(hidden),
+                                        byrow=T)
+                   }
                    sel_optim <- private$dist_list[[optim_method]]
                    init_optim <- eval(sel_optim)$new()
                    result <- init_optim$fit(self$data_model, theta, ll, gr, hidden, pi_vector,
                                             npar, self$latent, self$data_model$family)
-            
+                   if (!is.null(result_z)) {
+                     result$alpha <- result_z$par
+                   } else {
+                     result$alpha <- NULL
+                   }
                    return(result)
                  }
                  

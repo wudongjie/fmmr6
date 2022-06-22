@@ -28,6 +28,8 @@ double family_mixer(const arma::vec& theta, const arma::mat& Y,
                                      int latent, bool isLog){
     Family<T>* f = new T;
     int npar = theta.n_elem / latent;
+    //int p = X.n_cols;
+    //int n = X.n_rows;
     double l = 0.0;
     arma::rowvec pi_vector = arma::sum(d, 0)/d.n_rows;
     arma::mat result = arma::zeros(Y.n_rows, 1);
@@ -63,7 +65,7 @@ double family_mixer(const arma::vec& theta, const arma::mat& Y,
 NumericVector mix_ll(const arma::vec& theta, const arma::mat& Y,
                      const arma::mat& X, const arma::mat& d,
                      int latent, Rcpp::CharacterVector family, bool isLog,
-                     const arma::mat& constraint) {
+                     const arma::mat& constraint= arma::zeros(1,1)) {
     double l = 0.0;
     // d.n_cols = latent
     if (d.n_cols != latent) {
@@ -73,7 +75,7 @@ NumericVector mix_ll(const arma::vec& theta, const arma::mat& Y,
 
     // set and check family
     std::string fam = Rcpp::as<std::string>(family[0]);
-
+    
     // Y is multicolumn if family is multinom.
     if ((fam == "multinom") && (Y.n_cols<2)) {
         throw std::invalid_argument("Y is not a multi-column variable!");
@@ -98,9 +100,18 @@ NumericVector mix_ll(const arma::vec& theta, const arma::mat& Y,
         }
         l = family_mixer<FamilyLogit>(theta, Y,
                                   X, d, latent, isLog);
+    } else if (fam == "clogit"){
+        arma::vec theta_t = arma::vec((X.n_cols-1)*latent, arma::fill::zeros);
+        if (constraint.size() != 1) {
+            theta_t = gen_theta(theta, constraint);
+        } else {
+            theta_t = theta;
+        }
+        l = family_mixer<FamilyConditionalLogit>(theta_t, Y,
+                                  X, d, latent, isLog);
     } else if (fam == "multinom") {
         if ((theta.size() != Y.n_cols * X.n_cols*latent) && (constraint.size() == 1)) {
-          throw std::invalid_argument("Wrong numbers of estimates!");
+            throw std::invalid_argument("Wrong numbers of estimates!");
         }
         arma::vec theta_t = arma::vec(Y.n_cols * X.n_cols*latent, arma::fill::zeros);
         if (constraint.size() != 1) {
@@ -110,7 +121,11 @@ NumericVector mix_ll(const arma::vec& theta, const arma::mat& Y,
         }
         l = family_mixer<FamilyMultiNomial>(theta_t, Y,
                                         X, d, latent, isLog);
-    } else {
+    } else if (fam == "unidiff") {
+        l = family_mixer<FamilyUnidiff>(theta, Y,
+                                        X, d, latent, isLog);
+    }
+    else {
         throw std::invalid_argument( "Family does not exist!" );
     }
   

@@ -61,7 +61,8 @@ Create a new instance of this \link{R6} \link[R6:R6Class]{R6::R6Class} class.
   start = NULL,
   optim_method = "base",
   use_llc = T,
-  constraint = matrix(1)
+  constraint = matrix(1),
+  concomitant = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -87,6 +88,9 @@ The default is \code{TRUE}.}
 
 \item{\code{constraint}}{(\code{matrix()}) \cr
 The matrix of constraint values for the EM algorithm}
+
+\item{\code{concomitant}}{(\code{formula(1)}) \cr
+The formula for the concomitant model. E.g. \code{~ z1 + z2 + z3}.}
 }
 \if{html}{\out{</div>}}
 }

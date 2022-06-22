@@ -5,7 +5,11 @@ mix_ll <- function(theta, Y, X, d, latent, family, isLog, constraint) {
     .Call('_fmmr6_mix_ll', PACKAGE = 'fmmr6', theta, Y, X, d, latent, family, isLog, constraint)
 }
 
-post_pr <- function(theta, pi_v, Y, X, latent, family, constraint) {
-    .Call('_fmmr6_post_pr', PACKAGE = 'fmmr6', theta, pi_v, Y, X, latent, family, constraint)
+pi_ll <- function(alpha, X, d, latent) {
+    .Call('_fmmr6_pi_ll', PACKAGE = 'fmmr6', alpha, X, d, latent)
+}
+
+post_pr <- function(theta, pi_m, Y, X, latent, family, constraint) {
+    .Call('_fmmr6_post_pr', PACKAGE = 'fmmr6', theta, pi_m, Y, X, latent, family, constraint)
 }
 

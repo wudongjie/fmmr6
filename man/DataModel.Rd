@@ -19,9 +19,6 @@ Dongjie Wu
 \item{\code{formula}}{(\code{formula(1)})\cr
 The formula used in the model.}
 
-\item{\code{data_format}}{(\code{character(1)})\cr
-The data format: default is "data.frame".}
-
 \item{\code{data}}{(\code{data.frame()|data.table()|table()})\cr
 Data used in the model.}
 
@@ -31,11 +28,24 @@ The matrix of the independent variables.}
 \item{\code{Y}}{(\code{matrix()})\cr
 The matrix of the dependent variables.}
 
+\item{\code{Z}}{(\code{matrix()})\cr
+The matrix of the concomitant variables.}
+
 \item{\code{Y_coln}}{(\code{character()})\cr
 The column value labels.}
 
+\item{\code{data_var}}{(\code{list()})\cr
+A list for identifying variables in the data.}
+
 \item{\code{family}}{(\code{character(1)})\cr
 The distribution family of the model.}
+
+\item{\code{concomitant}}{(\code{formula(1)})\cr
+The formula to model the concomitant model.
+The default value is NULL.}
+
+\item{\code{X_ex}}{(\code{matrix()})\cr
+The extended data for X.}
 }
 \if{html}{\out{</div>}}
 }
@@ -43,6 +53,10 @@ The distribution family of the model.}
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{DataModel$new()}}
+\item \href{#method-data_to_table}{\code{DataModel$data_to_table()}}
+\item \href{#method-data_to_ind}{\code{DataModel$data_to_ind()}}
+\item \href{#method-table_to_ind}{\code{DataModel$table_to_ind()}}
+\item \href{#method-ind_to_table}{\code{DataModel$ind_to_table()}}
 \item \href{#method-clone}{\code{DataModel$clone()}}
 }
 }
@@ -52,7 +66,16 @@ The distribution family of the model.}
 \subsection{Method \code{new()}}{
 Initialize and generate the \code{DataModel} object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataModel$new(data, formula, family, mn_base = 1)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataModel$new(
+  data,
+  formula,
+  family,
+  data_str = "default",
+  data_var = NULL,
+  mn_base = 1,
+  concomitant = NULL,
+  group = NULL
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -67,11 +90,97 @@ The formula used in the model.}
 \item{\code{family}}{(\code{character(1)})\cr
 The distribution family of the model.}
 
+\item{\code{data_str}}{(\code{character(1)})\cr
+Desired data structure.
+Available data structure are listed as follows:
+
+\code{default}: Default data structure, the DataModel object will identify
+the dependent variable \code{Y} and the independent variable \code{X} based on
+the provided formula.
+
+\code{freq_tab}: the frequency table. The data must contain a \code{freq} variable.
+
+\code{long}: Data in the long format. Normally used for a longitudinal/panel data.
+The data must contain a variable to identify the changes within observation,
+e.g. the observations made at different time \code{t}. One should also define a variable
+for identifying each observation, e.g. \code{obs}.
+
+\code{wide}: Data in the wide format. This data format collapses a longitudinal data
+into one row for one observation.
+
+\code{longc}: Data in the long format used in a choice model. Variable \code{alt} represents
+the alternative for each individual. Variable \code{chosen} shows which \code{alt} is chosen.
+
+\code{widec} Data in the wide format used in a choice model.}
+
+\item{\code{data_str}}{(\code{character(1)})\cr
+Desired data structure.
+Available data structure are listed as follows:
+
+\code{default}: Default data structure, the DataModel object will identify
+the dependent variable \code{Y} and the independent variable \code{X} based on
+the provided formula.
+
+\code{freq_tab}: the frequency table. The data must contain a \code{freq} variable.
+
+\code{long}: Data in the long format. Normally used for a longitudinal/panel data.
+The data must contain a variable to identify the changes within observation,
+e.g. the observations made at different time \code{t}. One should also define a variable
+for identifying each observation, e.g. \code{obs}.
+
+\code{wide}: Data in the wide format. This data format collapses a longitudinal data
+into one row for one observation.
+
+\code{longc}: Data in the long format used in a choice model. Variable \code{alt} represents
+the alternative for each individual. Variable \code{chosen} shows which \code{alt} is chosen.
+
+\code{widec} Data in the wide format used in a choice model.}
+
 \item{\code{mn_base}}{(\code{integer(1)}) \cr
 Determine which column of the multinomial variable is set to be the base group.}
+
+\item{\code{concomitant}}{(\code{formula(1)})\cr
+The formula to model the concomitant model.
+The default value is NULL.}
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-data_to_table"></a>}}
+\if{latex}{\out{\hypertarget{method-data_to_table}{}}}
+\subsection{Method \code{data_to_table()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataModel$data_to_table()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-data_to_ind"></a>}}
+\if{latex}{\out{\hypertarget{method-data_to_ind}{}}}
+\subsection{Method \code{data_to_ind()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataModel$data_to_ind()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-table_to_ind"></a>}}
+\if{latex}{\out{\hypertarget{method-table_to_ind}{}}}
+\subsection{Method \code{table_to_ind()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataModel$table_to_ind(y, x, data, obs)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ind_to_table"></a>}}
+\if{latex}{\out{\hypertarget{method-ind_to_table}{}}}
+\subsection{Method \code{ind_to_table()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataModel$ind_to_table(chosen, x, data, alt)}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

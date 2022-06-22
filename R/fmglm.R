@@ -41,6 +41,11 @@ fmglm <- R6Class("fmglm",
         #' The constraint matrix.
         constraint = NULL,
         
+        #' @field concomitant (`formula(1)`)\cr
+        #' The formula to model the concomitant model.
+        #' The default value is NULL.
+        concomitant = NULL,
+        
         #' @field optim_method (`character(1)`) \cr
         #' The optimization method to use to fit the model.
         optim_method = NULL,
@@ -62,6 +67,8 @@ fmglm <- R6Class("fmglm",
         #' @param optim_method (`character(1)`) \cr
         #' The optimization method to use to fit the model.
         #' The default is `base`.
+        #' @param concomitant (`formula(1)`) \cr
+        #' The formula for the concomitant model. E.g. `~ z1 + z2 + z3`.
         #' @param use_llc (`boolean(1)`) \cr
         #' Whether to use the complete log-likelihood or the normal log-likelihood.
         #' The default is `TRUE`.
@@ -71,25 +78,37 @@ fmglm <- R6Class("fmglm",
         #' The constraint matrix.
         #' @return Return a R6 object of class fmglm
 
-        initialize = function(formula, data, family="gaussian", latent=2,
+        initialize = function(formula, data, data_str="default", 
+                              data_var=NULL,
+                              family="gaussian", latent=2,
                               method="em", start=NULL, optim_method="base", 
-                              use_llc=TRUE, mn_base=1,constraint=matrix(1)) {
+                              concomitant=NULL, use_llc=TRUE, 
+                              mn_base=1,constraint=matrix(1)) {
             self$start <- start
             self$optim_method <- optim_method
             self$latent <- latent
             self$family <- family
-            self$data_model <- DataModel$new(data, formula, family=family, mn_base=mn_base)
+            #browser()
+            self$data_model <- DataModel$new(data, formula, 
+                                             family=family, 
+                                             mn_base=mn_base, 
+                                             data_str=data_str,
+                                             data_var=data_var,
+                                             concomitant=concomitant)
             self$constraint <- constraint
+            self$concomitant <- concomitant
             # check the start value
             if (method == "mle") {
                 self$method <- mle$new(self$latent, self$data_model,
                                        start=self$start, optim_method=self$optim_method, 
-                                       use_llc=use_llc, constraint=self$constraint)
+                                       use_llc=use_llc, constraint=self$constraint,
+                                       concomitant=self$concomitant)
             } 
             if (method == "em") {
               self$method <- em$new(self$latent, self$data_model,
                                     start=self$start, optim_method=self$optim_method, 
-                                    use_llc=use_llc, constraint=self$constraint)
+                                    use_llc=use_llc, constraint=self$constraint,
+                                    concomitant=self$concomitant)
             }
         },
         
@@ -116,9 +135,11 @@ fmglm <- R6Class("fmglm",
         #' Each rep, the EM_algorithm generates a start.
         #' It is only useful when `start` is `random`. 
         #' After all reps, the algorithm will pick the rep with maximum log likelihood.
-        #' The default value is 1       
-        fit = function(algo="em", max_iter=500, start="random", rep=1) {
-            private$.result <- self$method$fit(algo=algo, max_iter=max_iter, start=start, rep=rep)
+        #' The default value is 1
+        #' @param verbose (`boolean(1)`) \cr
+        #' Print the converging log-likelihood for all steps.   
+        fit = function(algo="em", max_iter=500, start="random", rep=1, verbose=F) {
+            private$.result <- self$method$fit(algo=algo, max_iter=max_iter, start=start, rep=rep, verbose=verbose)
             return(private$.result)
             #return(self$summary(result))
         },
